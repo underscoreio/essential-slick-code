@@ -6,7 +6,7 @@ scalaVersion := "2.10.3"
 
 libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.1"
 
-libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4"
-
 libraryDependencies += "org.postgresql" % "postgresql" % "9.3-1101-jdbc41"
+
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
 
