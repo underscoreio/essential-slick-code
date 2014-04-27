@@ -9,7 +9,9 @@ object Example4 extends App {
 
   object Tables extends {
     val profile = scala.slick.driver.PostgresDriver
-  } with Tables
+  } with Tables {
+    val db = Database.forURL("jdbc:postgresql:core-slick", user="core", password="trustno1", driver = "org.postgresql.Driver")
+  }
 
   trait Tables {
 
@@ -33,7 +35,7 @@ object Example4 extends App {
 
   import Tables._
 
-  Database.forURL("jdbc:postgresql:core-slick", user="core", password="trustno1", driver = "org.postgresql.Driver") withSession {
+  db.withSession {
     implicit session =>
 
       // Create the database table:
@@ -68,7 +70,6 @@ object Example4 extends App {
       // Update two columns:
       val udist2 = planets.filter(_.name === "Uranus").map(p => (p.name, p.distance))
       udist2.update( ("Foo", 100.0) )
-
 
   }
 }
