@@ -3,7 +3,7 @@ package underscoreio.schema
 import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.jdbc.meta.MTable
 
-object Example2 extends App {
+object Example3 extends App {
 
   class Planet(tag: Tag) extends Table[(Int,String,Double)](tag, "planet") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
@@ -43,14 +43,14 @@ object Example2 extends App {
       )
 
 
-      // Query:
+      // Update one column:
+      val udist = planets.filter(_.name === "Uranus").map(_.distance)
+      udist.update(19.2)
 
-      val query = for {
-        planet <- planets
-        if planet.distance < 5.0
-      } yield planet.name
+      // Update two columns:
+      val udist2 = planets.filter(_.name === "Uranus").map(p => (p.name, p.distance))
+      udist2.update( ("Foo", 100.0) )
 
-      println("Inner planets: " + query.run)
 
   }
 }

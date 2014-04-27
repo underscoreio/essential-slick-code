@@ -7,9 +7,11 @@
     </appender>
 
 
-    <logger name="scala.slick.jdbc.JdbcBackend.statement" level="DEBUG"/>
-    <logger name="scala.slick.session" level="DEBUG"/>
     <logger name="scala.slick" level="DEBUG"/>
+    <logger name="scala.slick.jdbc.JdbcBackend.statement" level="DEBUG"/>
+
+    <logger name="scala.slick.ast" level="INFO"/>
+    <logger name="scala.slick.compiler" level="INFO"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />
