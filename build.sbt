@@ -2,9 +2,9 @@ name := "core-slick-example"
 
 version := "1.0"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.4"
 
-libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.1"
+libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0"
 
 libraryDependencies += "org.postgresql" % "postgresql" % "9.3-1101-jdbc41"
 
