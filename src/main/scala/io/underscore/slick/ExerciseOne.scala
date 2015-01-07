@@ -24,13 +24,13 @@ object ExerciseOne extends App {
       //Define a query 
       val query = for {
         message ← messages
-        if message.from === "jono"
+        if message.from === "HAL"
       } yield message
 
       //Execute a query.
-      val messages_from_jono: List[Message] = query.list
+      val messages_from_HAL: List[Message] = query.list
 
-      println(s" ${messages_from_jono}")
+      println(s" ${messages_from_HAL}")
   }
 
 }
