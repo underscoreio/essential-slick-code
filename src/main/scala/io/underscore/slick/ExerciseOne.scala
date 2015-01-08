@@ -1,16 +1,18 @@
 package io.underscore.slick
 
 import scala.slick.driver.PostgresDriver.simple._
+import org.joda.time.DateTime
 
-object ExerciseOne extends App {
+object ExerciseOne extends Exercise {
 
-  final case class Message(from: String, content: String, id: Long = 0L)
+  final case class Message(id: Long = 0L,from: String, content: String, when: DateTime)
 
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def from = column[String]("from")
     def content = column[String]("content")
-    def * = (from, content, id) <> (Message.tupled, Message.unapply)
+    def when = column[DateTime]("when")
+    def * = (id,from, content, when) <> (Message.tupled, Message.unapply)
   }
 
   lazy val messages = TableQuery[MessageTable]
