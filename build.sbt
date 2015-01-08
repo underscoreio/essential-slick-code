@@ -12,6 +12,8 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
 
 libraryDependencies += "joda-time" % "joda-time" % "2.6"
 
+libraryDependencies += "org.joda" % "joda-convert" % "1.2"
+
 initialCommands in console := """
 import scala.slick.driver.PostgresDriver.simple._
 val db = Database.forURL("jdbc:postgresql:essential-slick", user="essential", password="trustno1", driver = "org.postgresql.Driver")
