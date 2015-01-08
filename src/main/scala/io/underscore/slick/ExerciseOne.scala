@@ -4,13 +4,13 @@ import scala.slick.driver.PostgresDriver.simple._
 
 object ExerciseOne extends App {
 
-  final case class Message(from: String, message: String, id: Long = 0L)
+  final case class Message(from: String, content: String, id: Long = 0L)
 
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def from = column[String]("from")
-    def message = column[String]("message")
-    def * = (from, message, id) <> (Message.tupled, Message.unapply)
+    def content = column[String]("content")
+    def * = (from, content, id) <> (Message.tupled, Message.unapply)
   }
 
   lazy val messages = TableQuery[MessageTable]
