@@ -1,18 +1,18 @@
 package io.underscore.slick
 
 import scala.slick.driver.SQLiteDriver.simple._
-import org.joda.time.DateTime
+import java.sql.Timestamp
 
-object ExerciseOne extends Exercise {
+object ExerciseOne extends App {
 
-  final case class Message(id: Long = 0L,from: String, content: String, when: DateTime)
+  final case class Message(id: Long,from: String, content: String, when: Timestamp)
 
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def from = column[String]("from")  
+    def sender = column[String]("sender")  
     def content = column[String]("content")
-    def when = column[DateTime]("when")
-    def * = (id,from, content, when) <> (Message.tupled, Message.unapply)
+    def ts = column[Timestamp]("ts")
+    def * = (id,sender, content, ts) <> (Message.tupled, Message.unapply)
   }
 
   lazy val messages = TableQuery[MessageTable]
@@ -20,13 +20,10 @@ object ExerciseOne extends Exercise {
   Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC") withSession {
     implicit session ⇒
 
-      //Create Schema 
-      messages.ddl.create
-
       //Define a query 
-      val query = for {
+      val query = for {  
         message ← messages
-        if message.from === "HAL"
+        if message.sender === "HAL"
       } yield message
 
       //Execute a query.
