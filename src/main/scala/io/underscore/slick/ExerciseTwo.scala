@@ -1,6 +1,6 @@
 package io.underscore.slick
 
-import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.driver.SQLiteDriver.simple._
 import scala.slick.jdbc.meta.MTable
 import org.joda.time.DateTime
 
@@ -18,7 +18,7 @@ object ExerciseTwo extends Exercise {
 
   lazy val messages = TableQuery[MessageTable]
 
-  Database.forURL("jdbc:postgresql:essential-slick", user = "essential", password = "trustno1", driver = "org.postgresql.Driver") withSession {
+  Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC") withSession {
     implicit session ⇒
 
       //Create Schema 

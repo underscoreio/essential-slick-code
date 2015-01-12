@@ -1,6 +1,6 @@
 package io.underscore.slick
 
-import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.driver.SQLiteDriver.simple._
 import org.joda.time.DateTime
 import java.sql.Timestamp
 
