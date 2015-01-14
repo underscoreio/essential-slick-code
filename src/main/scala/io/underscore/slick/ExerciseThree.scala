@@ -1,9 +1,12 @@
 package io.underscore.slick
 
+import java.sql.Timestamp
+import java.util.Properties
+
 import scala.slick.driver.SQLiteDriver.simple._
 import scala.slick.jdbc.meta.MTable
 import scala.slick.model.PrimaryKey
-import java.sql.Timestamp
+
 
 object ExerciseThree extends Exercise {
 
@@ -53,7 +56,10 @@ object ExerciseThree extends Exercise {
 
   lazy val messages = TableQuery[MessageTable]
 
-  Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC") withSession {
+  val props = new Properties()
+  props.setProperty("date_precision","SECONDS")  
+  
+  Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC", prop = props) withSession {
     implicit session ⇒
       val tables = messages :: users :: coluredShapes :: Nil
 

@@ -1,7 +1,10 @@
 package io.underscore.slick
 
-import scala.slick.driver.SQLiteDriver.simple._
 import java.sql.Timestamp
+import java.util.Properties
+
+import scala.slick.driver.SQLiteDriver.simple._
+
 
 object ExerciseOne extends App {
 
@@ -17,7 +20,11 @@ object ExerciseOne extends App {
 
   lazy val messages = TableQuery[MessageTable]
 
-  Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC") withSession {
+  
+  val props = new Properties()
+  props.setProperty("date_precision","SECONDS")  
+  
+  Database.forURL("jdbc:sqlite:essential-slick.db", user = "essential", password = "trustno1", driver = "org.sqlite.JDBC", prop = props) withSession {
     implicit session ⇒
 
       //Define a query 
