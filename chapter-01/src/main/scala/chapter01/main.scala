@@ -2,18 +2,27 @@ package chapter01
 
 import scala.slick.driver.H2Driver.simple._
 import java.sql.Timestamp
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone.UTC
 
 object Example extends App {
 
- // Row representation:
-  final case class Message(sender: String, content: String, ts: Timestamp, id: Long = 0L)
+  // Custom column mapping:
+  implicit val jodaDateTimeType =
+    MappedColumnType.base[DateTime, Timestamp](
+      dt => new Timestamp(dt.getMillis),
+      ts => new DateTime(ts.getTime, UTC)
+    )
+
+  // Row representation:
+  final case class Message(sender: String, content: String, ts: DateTime, id: Long = 0L)
 
   // Schema:
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
     def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def sender  = column[String]("sender")
     def content = column[String]("content")
-    def ts      = column[Timestamp]("ts")
+    def ts      = column[DateTime]("ts")
     def * = (sender, content, ts, id) <> (Message.tupled, Message.unapply)
   }
 
@@ -30,14 +39,14 @@ object Example extends App {
       // Create the table:
       messages.ddl.create
 
-      // Insert data:
-      val start = 98240532000L
+      // Insert the conversation, which took place in Feb, 2001:
+      val start = new DateTime(2001,2,17, 10,22,50)
 
       messages ++= Seq(
-        Message("Dave", "Hello, HAL. Do you read me, HAL?", new Timestamp(start)),
-        Message("HAL",  "Affirmative, Dave. I read you.", new Timestamp(start + 2000)),
-        Message("Dave", "Open the pod bay doors, HAL.", new Timestamp(start + 4000)),
-        Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", new Timestamp(start + 6000))
+        Message("Dave", "Hello, HAL. Do you read me, HAL?",             start),
+        Message("HAL",  "Affirmative, Dave. I read you.",               start plusSeconds 2),
+        Message("Dave", "Open the pod bay doors, HAL.",                 start plusSeconds 4),
+        Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
       )
 
       // Our first query:
@@ -46,7 +55,6 @@ object Example extends App {
         if message.sender === "HAL"
       } yield message
 
-      val results = halSays.run
-      println(results)
+      println(halSays.run)
   }
 }
