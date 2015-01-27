@@ -29,6 +29,12 @@ object Example extends App {
   // Table:
   lazy val messages = TableQuery[MessageTable]
 
+  // Our first query:
+  val halSays = for {
+    message <- messages
+    if message.sender === "HAL"
+  } yield message
+
   // Database connection details:
   def db = Database.forURL("jdbc:h2:mem:chapter01", driver="org.h2.Driver")
 
@@ -49,12 +55,7 @@ object Example extends App {
         Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
       )
 
-      // Our first query:
-      val halSays = for {
-        message <- messages
-        if message.sender === "HAL"
-      } yield message
-
+      // Run the query:
       println(halSays.run)
   }
 }
