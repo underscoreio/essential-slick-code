@@ -55,7 +55,28 @@ object Example extends App {
       val id =
         (messages returning messages.map(_.id)) += Message("HAL", "I'm back", DateTime.now)
       println(s"The ID inserted was: $id")
+      
+      val deleted = messages.delete
+      println(s"messages deleted $deleted")
+       messages.iterator.foreach(println)
 
+      messages ++= Seq(
+        Message("Dave", "Hello, HAL. Do you read me, HAL?",             start),
+        Message("HAL",  "Affirmative, Dave. I read you.",               start plusSeconds 2),
+        Message("Dave", "Open the pod bay doors, HAL.",                 start plusSeconds 4),
+        Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
+      )
+
+      //for comprehension
+      //val rowsAffected = messages.filter(_.sender === "HAL").map(msg => (msg.sender, msg.ts)).update("HAL 9000", DateTime.now)
+      val query = for {
+        message <- messages 
+        if message.sender === "HAL"
+      } yield (message.sender,message.ts)
+      
+      val rowsAffected = query.update("HAL 9000",DateTime.now())
+      messages.iterator.foreach(println)       
+      
   }
 
   //2.5.2 Plain SQL    
@@ -90,5 +111,5 @@ object Example extends App {
       messages.iterator.foreach(println)
     
   }
-       
+
 }
