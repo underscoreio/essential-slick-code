@@ -18,33 +18,33 @@ object Example extends App {
       ts ⇒ new DateTime(ts.getTime, UTC))
 
   // Row representation:
-  final case class Message(sender: Long, 
+  final case class Message(sender: Long,
                            content: String,
                            ts: DateTime,
-                           to: Option[Long] = None, 
+                           to: Option[Long] = None,
                            id: Long = 0L)
 
   // Schema:
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-    def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def sender   = column[Long]("sender")
-    def to       = column[Option[Long]]("to")
-    def content  = column[String]("content")
-    def ts       = column[DateTime]("ts")
-    def * = (sender, content, ts,to, id) <> (Message.tupled, Message.unapply)
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def sender = column[Long]("sender")
+    def to = column[Option[Long]]("to")
+    def content = column[String]("content")
+    def ts = column[DateTime]("ts")
+    def * = (sender, content, ts, to, id) <> (Message.tupled, Message.unapply)
   }
 
   // Table:
-  lazy val messages = TableQuery[MessageTable]  
-  
+  lazy val messages = TableQuery[MessageTable]
+
   final case class User(name: String, id: Long = 0L)
- 
+
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("sender")
-    def * = (name, id) <> (User.tupled,User.unapply)
+    def * = (name, id) <> (User.tupled, User.unapply)
   }
-  
+
   lazy val users = TableQuery[UserTable]
 
   // Database connection details:
@@ -65,7 +65,7 @@ object Example extends App {
 
       val oDave = users.filter(_.name === "Dave").firstOption
       val oHAL = users.filter(_.name === "Hal").firstOption
-      
+
       for {
         dave ← oDave
         hal ← oHAL
@@ -78,11 +78,10 @@ object Example extends App {
       }
       users.iterator.foreach(println)
       messages.iterator.foreach(println)
-
   }
 
 }
-object HListExample /* extends App */{
+object HListExample /* extends App */ {
 
   // Custom column mapping:
   implicit val jodaDateTimeType =
