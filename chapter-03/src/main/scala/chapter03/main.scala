@@ -1,9 +1,14 @@
 package chapter03
 
-import scala.slick.driver.H2Driver.simple._
 import java.sql.Timestamp
+
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
+
+import scala.slick.driver.H2Driver.simple._
+import scala.slick.collection.heterogenous.{HList,HCons,HNil,Nat}
+import scala.slick.collection.heterogenous.syntax._
+  
 
 object Example extends App {
 
@@ -15,7 +20,9 @@ object Example extends App {
 
   // Row representation:
   final case class Message(sender: Long, content: String, ts: DateTime, id: Long = 0L)
-  final case class User(name: String, id: Long = 0L)
+
+  //case class representation 
+  //final case class User(name: String, id: Long = 0L)
   //tuple represenation of a user 
   //type  User = (String,Long)
     
@@ -29,12 +36,13 @@ object Example extends App {
     def * = (sender, content, ts, id) <> (Message.tupled, Message.unapply)
   }
 
+  type User  = String :: Long :: HNil  
+  
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("sender")
-    def * = (name,id) <> (User.tupled, User.unapply)
+    def * = name :: id :: HNil
   }
-  
   
   // Table:
   lazy val messages = TableQuery[MessageTable]
@@ -55,7 +63,10 @@ object Example extends App {
       // Insert the conversation, which took place in Feb, 2001:
       val start = new DateTime(2001, 2, 17, 10, 22, 50)
       
-      users ++= Seq(User("Dave"),User("HAL"))
+      val dave = "Dave" :: 0L :: HNil
+      val hal = "HAL" :: 0L :: HNil
+      
+      users ++= Seq(dave,hal)
       
       val oDave = users.filter(_.name === "Dave").firstOption
       val oHAL = users.filter(_.name === "HAL").firstOption
@@ -64,11 +75,16 @@ object Example extends App {
         dave <- oDave
         hal <- oHAL
       } {
+      val index = Nat(1)
+      val daveId = dave(index)
+      val halId = hal(index)
+      println(s"daveId $daveId")
+      println(s"daveId $halId")      
       messages ++= Seq(
-        Message(dave.id, "Hello, HAL. Do you read me, HAL?", start),
-        Message(hal.id, "Affirmative, Dave. I read you.", start plusSeconds 2),
-        Message(dave.id, "Open the pod bay doors, HAL.", start plusSeconds 4),
-        Message(hal.id, "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
+        Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
+        Message(halId, "Affirmative, Dave. I read you.", start plusSeconds 2),
+        Message(dave.tail.head, "Open the pod bay doors, HAL.", start plusSeconds 4),
+        Message(hal.tail.head, "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
       }
       users.iterator.foreach(println)
       messages.iterator.foreach(println)
