@@ -26,12 +26,14 @@ object Example extends App {
 
   // Schema:
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def sender = column[Long]("sender")
-    def to = column[Option[Long]]("to")
-    def content = column[String]("content")
-    def ts = column[DateTime]("ts")
-    def * = (sender, content, ts, to, id) <> (Message.tupled, Message.unapply)
+    def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def senderId = column[Long]("sender")
+    def sender   = foreignKey("sender_fk", senderId, users)(_.id)
+    def toId     = column[Option[Long]]("to")
+    def to       = foreignKey("to_fk", toId, users)(_.id)    
+    def content  = column[String]("content")
+    def ts       = column[DateTime]("ts")
+    def * = (senderId, content, ts, toId, id) <> (Message.tupled, Message.unapply)
   }
 
   // Table:
@@ -41,7 +43,7 @@ object Example extends App {
 
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("sender")
+    def name = column[String]("name")
     def * = (name, id) <> (User.tupled, User.unapply)
   }
 
@@ -58,6 +60,9 @@ object Example extends App {
 
       ddl.create
 
+      ddl.createStatements.foreach(println)
+      
+      
       // Insert the conversation, which took place in Feb, 2001:
       val start = new DateTime(2001, 2, 17, 10, 22, 50)
 
@@ -78,6 +83,11 @@ object Example extends App {
       }
       users.iterator.foreach(println)
       messages.iterator.foreach(println)
+
+      
+//    This will cause a runtime exception as  we have violated referential integrity.       
+//      messages += Message(3L, "Hello, HAL. Do you read me, HAL?", start)
+      
   }
 
 }
