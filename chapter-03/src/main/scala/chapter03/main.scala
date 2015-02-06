@@ -17,62 +17,69 @@ object Example extends App {
       dt ⇒ new Timestamp(dt.getMillis),
       ts ⇒ new DateTime(ts.getTime, UTC))
 
+  implicit val messagePKMapper = MappedColumnType.base[MessagePK, Long](_.value, MessagePK(_))
+  implicit val userPKMapper = MappedColumnType.base[UserPK, Long](_.value, UserPK(_))
+  implicit val roomPKMapper = MappedColumnType.base[RoomPK, Long](_.value, RoomPK(_)) 
+
+  final case class MessagePK(value: Long) extends AnyVal
+  final case class UserPK(value: Long) extends AnyVal
+  final case class RoomPK(value: Long) extends AnyVal  
+
   // Row representation:
-  final case class Message(sender: Long,
+  final case class Message(sender: UserPK,
                            content: String,
                            ts: DateTime,
-                           to: Option[Long] = None,
-                           id: Long = 0L)
+                           to: Option[UserPK] = None,
+                           id: MessagePK = MessagePK(0))
 
   // Schema:
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-    def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def senderId = column[Long]("sender")
-    def sender   = foreignKey("sender_fk", senderId, users)(_.id)
-    def toId     = column[Option[Long]]("to")
-    def to       = foreignKey("to_fk", toId, users)(_.id)    
-    def content  = column[String]("content")
-    def ts       = column[DateTime]("ts")
+    def id = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
+    def senderId = column[UserPK]("sender")
+    def sender = foreignKey("sender_fk", senderId, users)(_.id)
+    def toId = column[Option[UserPK]]("to")
+    def to = foreignKey("to_fk", toId, users)(_.id)
+    def content = column[String]("content")
+    def ts = column[DateTime]("ts")
     def * = (senderId, content, ts, toId, id) <> (Message.tupled, Message.unapply)
   }
 
   // Table:
   lazy val messages = TableQuery[MessageTable]
 
-  final case class User(name: String, id: Long = 0L)
+  final case class User(name: String, id: UserPK = UserPK(0L))
 
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def id = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def * = (name, id) <> (User.tupled, User.unapply)
   }
 
   lazy val users = TableQuery[UserTable]
 
-  final case class Room(name: String, id: Long = 0L)
+  final case class Room(name: String, id: RoomPK = RoomPK(0L))
 
-  final class RoomTable(tag: Tag) extends Table[User](tag, "room") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  final class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
+    def id = column[RoomPK]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
-    def * = (name, id) <> (User.tupled, User.unapply)
+    def * = (name, id) <> (Room.tupled, Room.unapply)
   }
 
-  lazy val rooms = TableQuery[RoomTable]  
-  
-  final case class Occupant(roomId:Long,userId:Long)
+  lazy val rooms = TableQuery[RoomTable]
+
+  final case class Occupant(roomId: RoomPK, userId: UserPK)
 
   final class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
-    def roomId = column[Long]("room")
-    //def room   = foreignKey("room_fk", roomId, rooms)(_.id)
-    def userId = column[Long]("user")
-    //def user   = foreignKey("user_fk", userId, users)(_.id)
-    def pk = primaryKey("room_user_pk", (roomId,userId))
-    def * = (roomId,userId) <> (Occupant.tupled, Occupant.unapply)
+    def roomId = column[RoomPK]("room")
+    def room   = foreignKey("room_fk", roomId, rooms)(_.id)
+    def userId = column[UserPK]("user")
+    def user   = foreignKey("user_fk", userId, users)(_.id)
+    def pk = primaryKey("room_user_pk", (roomId, userId))
+    def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
   }
-  
-  lazy val occupants = TableQuery[OccupantTable]  
-  
-  
+
+  lazy val occupants = TableQuery[OccupantTable]
+
   // Database connection details:
   def db = Database.forURL("jdbc:h2:mem:chapter02", driver = "org.h2.Driver")
 
@@ -85,8 +92,7 @@ object Example extends App {
       ddl.create
 
       ddl.createStatements.foreach(println)
-      
-      
+
       // Insert the conversation, which took place in Feb, 2001:
       val start = new DateTime(2001, 2, 17, 10, 22, 50)
 
@@ -108,23 +114,20 @@ object Example extends App {
       users.iterator.foreach(println)
       messages.iterator.foreach(println)
 
-      
-//    This will cause a runtime exception as  we have violated referential integrity.       
-//      messages += Message(3L, "Hello, HAL. Do you read me, HAL?", start)
-      
+      //    This will cause a runtime exception as  we have violated referential integrity.       
+      //      messages += Message(3L, "Hello, HAL. Do you read me, HAL?", start)
+
       val senders = for {
-        message <- messages 
+        message ← messages
         if message.content.toLowerCase like "%do%"
-        sender <- message.sender
-      } yield sender 
-     
-      println("top")
+        sender ← message.sender
+      } yield sender
+
       senders.foreach(println)
-      println("bottom")
-      println(senders)
-      
-      
-      
+
+    // This will no longer compile    
+    // val rubbish = oHAL.map{hal => messages.filter(msg => msg.id === hal.id)  }
+
   }
 
 }
