@@ -19,7 +19,9 @@ object Example extends App {
 
   implicit val messagePKMapper = MappedColumnType.base[MessagePK, Long](_.value, MessagePK(_))
   implicit val userPKMapper = MappedColumnType.base[UserPK, Long](_.value, UserPK(_))
-  implicit val roomPKMapper = MappedColumnType.base[RoomPK, Long](_.value, RoomPK(_)) 
+  implicit val roomPKMapper = MappedColumnType.base[RoomPK, Long](_.value, RoomPK(_))
+  
+  implicit val roomTypeMapper = MappedColumnType.base[RoomType.Value, Int](_.id, RoomType(_)) 
 
   final case class MessagePK(value: Long) extends AnyVal
   final case class UserPK(value: Long) extends AnyVal
@@ -29,6 +31,7 @@ object Example extends App {
   final case class Message(sender: UserPK,
                            content: String,
                            ts: DateTime,
+                           deleted:Boolean = false,
                            to: Option[UserPK] = None,
                            id: MessagePK = MessagePK(0))
 
@@ -40,8 +43,9 @@ object Example extends App {
     def toId = column[Option[UserPK]]("to")
     def to = foreignKey("to_fk", toId, users)(_.id)
     def content = column[String]("content")
+    def deleted = column[Boolean]("deleted")
     def ts = column[DateTime]("ts")
-    def * = (senderId, content, ts, toId, id) <> (Message.tupled, Message.unapply)
+    def * = (senderId, content, ts, deleted, toId, id) <> (Message.tupled, Message.unapply)
   }
 
   // Table:
@@ -58,12 +62,19 @@ object Example extends App {
 
   lazy val users = TableQuery[UserTable]
 
-  final case class Room(name: String, id: RoomPK = RoomPK(0L))
+  object RoomType extends Enumeration {
+    type RoomType = Value
+    val Private,Public = Value
+  }
+  
+  
+  final case class Room(name: String,roomType:RoomType.Value,  id: RoomPK = RoomPK(0L))
 
   final class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
     def id = column[RoomPK]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
-    def * = (name, id) <> (Room.tupled, Room.unapply)
+    def roomType = column[RoomType.Value]("roomType", O.Default(RoomType.Public))
+    def * = (name, roomType, id) <> (Room.tupled, Room.unapply)
   }
 
   lazy val rooms = TableQuery[RoomTable]
