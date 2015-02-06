@@ -49,6 +49,30 @@ object Example extends App {
 
   lazy val users = TableQuery[UserTable]
 
+  final case class Room(name: String, id: Long = 0L)
+
+  final class RoomTable(tag: Tag) extends Table[User](tag, "room") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("name")
+    def * = (name, id) <> (User.tupled, User.unapply)
+  }
+
+  lazy val rooms = TableQuery[RoomTable]  
+  
+  final case class Occupant(roomId:Long,userId:Long)
+
+  final class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
+    def roomId = column[Long]("room")
+    //def room   = foreignKey("room_fk", roomId, rooms)(_.id)
+    def userId = column[Long]("user")
+    //def user   = foreignKey("user_fk", userId, users)(_.id)
+    def pk = primaryKey("room_user_pk", (roomId,userId))
+    def * = (roomId,userId) <> (Occupant.tupled, Occupant.unapply)
+  }
+  
+  lazy val occupants = TableQuery[OccupantTable]  
+  
+  
   // Database connection details:
   def db = Database.forURL("jdbc:h2:mem:chapter02", driver = "org.h2.Driver")
 
@@ -56,7 +80,7 @@ object Example extends App {
   db.withSession {
     implicit session ⇒
       // Create the tables:
-      val ddl = messages.ddl ++ users.ddl
+      val ddl = messages.ddl ++ users.ddl ++ rooms.ddl ++ occupants.ddl
 
       ddl.create
 
@@ -87,6 +111,19 @@ object Example extends App {
       
 //    This will cause a runtime exception as  we have violated referential integrity.       
 //      messages += Message(3L, "Hello, HAL. Do you read me, HAL?", start)
+      
+      val senders = for {
+        message <- messages 
+        if message.content.toLowerCase like "%do%"
+        sender <- message.sender
+      } yield sender 
+     
+      println("top")
+      senders.foreach(println)
+      println("bottom")
+      println(senders)
+      
+      
       
   }
 
