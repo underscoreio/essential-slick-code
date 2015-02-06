@@ -47,12 +47,13 @@ object Example extends App {
   // Table:
   lazy val messages = TableQuery[MessageTable]
 
-  final case class User(name: String, id: UserPK = UserPK(0L))
+  final case class User(name: String,avatar:Option[Array[Byte]] = None, id: UserPK = UserPK(0L))
 
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
     def id = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
-    def * = (name, id) <> (User.tupled, User.unapply)
+    def name = column[String]("name",O.Default("☃"))
+    def avatar = column[Option[Array[Byte]]]("avatar",O.DBType("Binary(2048)"))
+    def * = (name,avatar, id) <> (User.tupled, User.unapply)
   }
 
   lazy val users = TableQuery[UserTable]
