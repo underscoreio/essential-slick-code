@@ -20,18 +20,18 @@ object Example extends App {
   implicit val messagePKMapper = MappedColumnType.base[MessagePK, Long](_.value, MessagePK(_))
   implicit val userPKMapper = MappedColumnType.base[UserPK, Long](_.value, UserPK(_))
   implicit val roomPKMapper = MappedColumnType.base[RoomPK, Long](_.value, RoomPK(_))
-  
-  implicit val roomTypeMapper = MappedColumnType.base[RoomType.Value, Int](_.id, RoomType(_)) 
+
+  implicit val roomTypeMapper = MappedColumnType.base[RoomType, Int](_.id, RoomType(_))
 
   final case class MessagePK(value: Long) extends AnyVal
   final case class UserPK(value: Long) extends AnyVal
-  final case class RoomPK(value: Long) extends AnyVal  
+  final case class RoomPK(value: Long) extends AnyVal
 
   // Row representation:
   final case class Message(sender: UserPK,
                            content: String,
                            ts: DateTime,
-                           deleted:Boolean = false,
+                           deleted: Boolean = false,
                            to: Option[UserPK] = None,
                            id: MessagePK = MessagePK(0))
 
@@ -51,29 +51,35 @@ object Example extends App {
   // Table:
   lazy val messages = TableQuery[MessageTable]
 
-  final case class User(name: String,avatar:Option[Array[Byte]] = None, id: UserPK = UserPK(0L))
+  final case class User(name: String, avatar: Option[Array[Byte]] = None, id: UserPK = UserPK(0L))
 
   final class UserTable(tag: Tag) extends Table[User](tag, "user") {
     def id = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name",O.Default("☃"))
-    def avatar = column[Option[Array[Byte]]]("avatar",O.DBType("Binary(2048)"))
-    def * = (name,avatar, id) <> (User.tupled, User.unapply)
+    def name = column[String]("name", O.Default("☃"))
+    def avatar = column[Option[Array[Byte]]]("avatar", O.DBType("Binary(2048)"))
+    def * = (name, avatar, id) <> (User.tupled, User.unapply)
   }
 
   lazy val users = TableQuery[UserTable]
 
-  object RoomType extends Enumeration {
-    type RoomType = Value
-    val Private,Public = Value
+  sealed trait RoomType { val id:Int }
+  case object Private extends RoomType { val id = 0 }
+  case object Public extends RoomType { val id = 1 }
+
+  object RoomType {
+    def apply(id: Int) = id match {
+      case 0 ⇒ Private
+      case 1 ⇒ Public
+      case _ ⇒ Public //evil
+    }
   }
-  
-  
-  final case class Room(name: String,roomType:RoomType.Value,  id: RoomPK = RoomPK(0L))
+
+  final case class Room(name: String, roomType: RoomType, id: RoomPK = RoomPK(0L))
 
   final class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
     def id = column[RoomPK]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
-    def roomType = column[RoomType.Value]("roomType", O.Default(RoomType.Public))
+    def roomType = column[RoomType]("roomType", O.Default(Public))
     def * = (name, roomType, id) <> (Room.tupled, Room.unapply)
   }
 
@@ -83,9 +89,9 @@ object Example extends App {
 
   final class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
     def roomId = column[RoomPK]("room")
-    def room   = foreignKey("room_fk", roomId, rooms)(_.id)
+    def room = foreignKey("room_fk", roomId, rooms)(_.id)
     def userId = column[UserPK]("user")
-    def user   = foreignKey("user_fk", userId, users)(_.id)
+    def user = foreignKey("user_fk", userId, users)(_.id)
     def pk = primaryKey("room_user_pk", (roomId, userId))
     def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
   }
