@@ -49,67 +49,35 @@ object Example extends App {
         Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
       )
 
+      // Delete all messages from HAL:
       val rowsDeleted = messages.filter(_.sender === "HAL").delete
       println(s"Result of deleting HAL messages: $rowsDeleted")
 
+      // Insert one, returning the ID:
       val id =
         (messages returning messages.map(_.id)) += Message("HAL", "I'm back", DateTime.now)
       println(s"The ID inserted was: $id")
-      
-      val deleted = messages.delete
-      println(s"messages deleted $deleted")
-       messages.iterator.foreach(println)
 
-      messages ++= Seq(
-        Message("Dave", "Hello, HAL. Do you read me, HAL?",             start),
-        Message("HAL",  "Affirmative, Dave. I read you.",               start plusSeconds 2),
-        Message("Dave", "Open the pod bay doors, HAL.",                 start plusSeconds 4),
-        Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
-      )
-
-      //for comprehension
-      //val rowsAffected = messages.filter(_.sender === "HAL").map(msg => (msg.sender, msg.ts)).update("HAL 9000", DateTime.now)
+      // Update HAL's name and the time of the message:
       val query = for {
-        message <- messages 
+        message <- messages
         if message.sender === "HAL"
-      } yield (message.sender,message.ts)
-      
-      val rowsAffected = query.update("HAL 9000",DateTime.now())
-      messages.iterator.foreach(println)       
-      
-  }
+      } yield (message.sender, message.ts)
 
-  //2.5.2 Plain SQL    
-  import scala.slick.driver.JdbcDriver.backend.Database
-  import Database.dynamicSession  
-  import scala.slick.jdbc.StaticQuery
-  import StaticQuery.interpolation    
+      val rowsAffected = query.update("HAL 9000", DateTime.now)
 
-  db.withDynSession {
-
-      //  Create the table:
-      messages.ddl.create
-
-      // Insert the conversation, which took place in Feb, 2001:
-      val start = new DateTime(2001,2,17, 10,22,50)
-
-      messages ++= Seq(
-        Message("Dave", "Hello, HAL. Do you read me, HAL?",             start),
-        Message("HAL",  "Affirmative, Dave. I read you.",               start plusSeconds 2),
-        Message("Dave", "Open the pod bay doors, HAL.",                 start plusSeconds 4),
-        Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6)
-      )
-      println("original")
+      // Current state of the database:
       messages.iterator.foreach(println)
 
-      val unsafe_parameter = """ 'X');DROP TABLE "message"; select random( """
-  
-      val update = sqlu"""UPDATE "message" SET "content" = CONCAT("content", $unsafe_parameter)""".firstOption     
+      // Plain SQL Query example:
+      import scala.slick.jdbc.StaticQuery.interpolation
 
-      
-      println(s"updated $update")
-      messages.iterator.foreach(println)
-    
+      val plainQuery =
+        sqlu"""UPDATE "message" SET "content" = CONCAT("content", '!')"""
+
+      val numRowsModified = plainQuery.first
+
+      println(s"Rows changed via plain query: $numRowsModified")
   }
 
 }
