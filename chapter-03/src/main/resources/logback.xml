@@ -8,10 +8,10 @@
   <logger name="scala.slick"                              level="INFO"/>
   <logger name="scala.slick.ast"                          level="INFO"/>
   <logger name="scala.slick.compiler"                     level="INFO"/>
-  <logger name="scala.slick.jdbc.JdbcBackend.statement"   level="INFO"/>
-  <logger name="scala.slick.jdbc.StatementInvoker.result" level="INFO"/>
+  <logger name="scala.slick.jdbc.JdbcBackend.statement"   level="DEBUG"/>
+  <logger name="scala.slick.jdbc.StatementInvoker.result" level="DEBUG"/>
 
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
