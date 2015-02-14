@@ -11,8 +11,9 @@ object ValueClassesExample extends App {
   }
 
   object PKs {
-    case class MessagePK(value: Long) extends AnyVal
-    case class UserPK(value: Long) extends AnyVal
+    import scala.slick.lifted.MappedTo
+    case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
+    case class UserPK(value: Long) extends AnyVal with MappedTo[Long]
   }
 
   trait Tables {
@@ -25,11 +26,6 @@ object ValueClassesExample extends App {
       MappedColumnType.base[DateTime, Timestamp](
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
-
-    implicit val messagePKMapper = MappedColumnType.base[MessagePK, Long](_.value, MessagePK(_))
-
-    implicit val userPKMapper    = MappedColumnType.base[UserPK, Long](_.value, UserPK(_))
-
 
     case class User(name: String, id: UserPK = UserPK(0L))
 
@@ -69,6 +65,7 @@ object ValueClassesExample extends App {
   val schema = new Schema(scala.slick.driver.H2Driver)
 
   import schema._, profile.simple._
+  import PKs._
 
   def db = Database.forURL("jdbc:h2:mem:chapter03", driver = "org.h2.Driver")
 
@@ -90,9 +87,8 @@ object ValueClassesExample extends App {
         Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
         Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
 
-        println(
-          users.list
-        )
+       // Won't compile:
+       // users.filter(_.id === 6L).run
   }
 
 }
