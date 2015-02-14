@@ -12,7 +12,8 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:postfixOps",
   "-Ywarn-dead-code",
-  "-Xlint"
+  "-Xlint",
+  "-Xfatal-warnings"
   )
 
 
