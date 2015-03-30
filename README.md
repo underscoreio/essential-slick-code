@@ -1,3 +1,3 @@
-# Source Code to Accompnay _Essential Slick_.
+# Source Code to Accompany _Essential Slick_.
 
 
