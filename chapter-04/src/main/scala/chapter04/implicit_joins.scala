@@ -4,6 +4,14 @@ import  java.sql.Timestamp
 import  org.joda.time.DateTime
 import  org.joda.time.DateTimeZone._
 
+object PKs {
+  import scala.slick.lifted.MappedTo
+  case class UserPK(value: Long) extends AnyVal with MappedTo[Long]
+  case class RoomPK(value: Long) extends AnyVal with MappedTo[Long]
+  case class OccupantPK(value: Long) extends AnyVal with MappedTo[Long]
+  case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
+}
+
 object ImplicitJoinsExample extends App {
 
   trait Profile {
@@ -13,12 +21,13 @@ object ImplicitJoinsExample extends App {
   trait Tables {
     this: Profile =>
 
+    import PKs._
     import profile.simple._
 
-    case class User(id: Option[Long], name: String, email: Option[String] = None)
+    case class User(id: Option[UserPK], name: String, email: Option[String] = None)
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
-      def id    = column[Long]("id", O.AutoInc, O.PrimaryKey)
+      def id    = column[UserPK]("id", O.AutoInc, O.PrimaryKey)
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
@@ -28,10 +37,10 @@ object ImplicitJoinsExample extends App {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
-    case class Room(title: String, id: Long = 0L)
+    case class Room(title: String, id:RoomPK = RoomPK(0L))
 
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
-     def id    = column[Long]("id", O.PrimaryKey, O.AutoInc)
+     def id    = column[RoomPK]("id", O.PrimaryKey, O.AutoInc)
      def title = column[String]("title")
      def * = (title, id) <> (Room.tupled, Room.unapply)
     }
@@ -39,11 +48,11 @@ object ImplicitJoinsExample extends App {
     lazy val rooms = TableQuery[RoomTable]
     lazy val insertRoom = rooms returning rooms.map(_.id)
 
-    case class Occupant(roomId: Long, userId: Long)
+    case class Occupant(roomId: RoomPK, userId: UserPK)
 
     class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
-      def roomId = column[Long]("room")
-      def userId = column[Long]("user")
+      def roomId = column[RoomPK]("room")
+      def userId = column[UserPK]("user")
 
       def pk = primaryKey("occ_room_user_pk", (roomId, userId))
 
@@ -62,14 +71,19 @@ object ImplicitJoinsExample extends App {
         ts => new DateTime(ts.getTime, UTC)
     )
 
-    case class Message(senderId: Long, content: String, ts: DateTime, id: Long = 0L, toId:Option[Long], roomId:Option[Long])
+    case class Message(senderId: UserPK,
+                       content: String,
+                       ts: DateTime,
+                       id: MessagePK         = MessagePK(0L),
+                       toId:Option[UserPK]   = None,
+                       roomId:Option[RoomPK] = None)
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-      def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
-      def senderId = column[Long]("sender")
+      def id       = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
+      def senderId = column[UserPK]("sender")
       def content  = column[String]("content")
-      def toId     = column[Option[Long]]("to")
-      def roomId   = column[Option[Long]]("room")
+      def toId     = column[Option[UserPK]]("to")
+      def roomId   = column[Option[RoomPK]]("room")
       def ts       = column[DateTime]("ts")
 
       def * = (senderId, content, ts, id, toId,roomId) <> (Message.tupled, Message.unapply)
@@ -88,7 +102,7 @@ object ImplicitJoinsExample extends App {
 
   val schema = new Schema(scala.slick.driver.H2Driver)
 
-  import schema._, profile.simple._
+  import schema._, profile.simple._, PKs._
 
   def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
 
@@ -98,14 +112,14 @@ object ImplicitJoinsExample extends App {
       (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
 
       // A few users:
-      val daveId: Long = insertUser += User(None, "Dave", Some("dave@example.org"))
-      val halId:  Long = insertUser += User(None, "HAL")
-      val elena:  Long = insertUser += User(None, "Elena", Some("elena@example.org"))
+      val daveId: UserPK = insertUser += User(None, "Dave", Some("dave@example.org"))
+      val halId:  UserPK = insertUser += User(None, "HAL")
+      val elena:  UserPK = insertUser += User(None, "Elena", Some("elena@example.org"))
 
       println( users.list )
 
       // A room:
-      val airLockId: Long = insertRoom += Room("Air Lock")
+      val airLockId: RoomPK = insertRoom += Room("Air Lock")
 
       println(rooms.list)
 
@@ -117,18 +131,20 @@ object ImplicitJoinsExample extends App {
 
       //add some messages to the room.
       messages ++= Seq(
-        Message(daveId, "Hello, HAL. Do you read me, HAL?", start,0,None,Some(airLockId)),
-        Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2,0,None,Some(airLockId)),
-        Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4,0,None,Some(airLockId)),
-        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6,0,None,Some(airLockId)))
+        Message(daveId, "Hello, HAL. Do you read me, HAL?", start,MessagePK(0L),None,Some(airLockId)),
+        Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2,MessagePK(0L),None,Some(airLockId)),
+        Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4,MessagePK(0L),None,Some(airLockId)),
+        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6,MessagePK(0L),None,Some(airLockId)))
 
 
       //implicit join
       val davesMessages = for {
         message <- messages
-        user  <- message.sender
-        room <- message.room
-        if user.id === daveId && room.id === airLockId && message.roomId === room.id
+        user    <- message.sender
+        room    <- message.room
+        if user.id === daveId &&
+           room.id === airLockId &&
+           message.roomId === room.id
       } yield message
 
       println("Dave's Messages")
