@@ -147,8 +147,16 @@ object ImplicitJoinsExample extends App {
            message.roomId === room.id
       } yield message
 
+      val altDavesMessages = for {
+        message <- messages
+        if message.senderId === daveId &&
+           message.roomId   === airLockId
+      } yield message
+
+
       println("Dave's Messages")
       println(davesMessages.list.mkString("\n"))
+      println(altDavesMessages.list.mkString("\n"))
   }
 
 }
