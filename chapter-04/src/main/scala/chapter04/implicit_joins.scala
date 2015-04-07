@@ -153,10 +153,37 @@ object ImplicitJoinsExample extends App {
            message.roomId   === airLockId
       } yield message
 
+      //explicit join
 
-      println("Dave's Messages")
-      println(davesMessages.list.mkString("\n"))
-      println(altDavesMessages.list.mkString("\n"))
+      lazy val x = for {
+        ((msgs, usrs), rms) ← messages leftJoin users on (_.senderId === _.id) leftJoin rooms on (_._1.roomId === _.id)
+        if usrs.id === daveId && rms.id === airLockId && rms.id.? === msgs.roomId
+      } yield msgs
+
+      lazy val y = for {
+        (m1, u) ← messages leftJoin users on (_.senderId === _.id)
+        (m2, r) ← messages leftJoin rooms on (_.roomId === _.id)
+        if m1.id === m2.id && u.id === daveId && r.id === airLockId && r.id.? === m1.roomId
+      } yield m1
+
+      lazy val z = messages.
+                      leftJoin(users).
+                        leftJoin(rooms).
+                          on{ case ((m,u),r) =>  m.senderId === u.id && m.roomId === r.id } .
+                            filter{case ((m,u),r) => u.id === daveId && r.id === airLockId} .
+                              map {case ((m,u),r) => m}
+
+
+//      println("Implicit Dave's Messages")
+//      println(davesMessages.list.mkString("\n"))
+//      println(altDavesMessages.list.mkString("\n"))
+//      println("Explicit Dave's Messages\nx\n")
+//
+//      println(x.list.mkString("\n"))
+//      println("Explicit Dave's Messages \ny\n")
+//      println(y.list.mkString("\n"))
+      println("Explicit Dave's Messages \nz\n")
+      println(z.list.mkString("\n"))
   }
 
 }
