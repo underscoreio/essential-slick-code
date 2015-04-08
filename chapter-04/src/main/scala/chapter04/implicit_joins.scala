@@ -173,15 +173,6 @@ object ImplicitJoinsExample extends App {
                             filter{case ((m,u),r) => u.id === daveId && r.id === airLockId} .
                               map {case ((m,u),r) => m}
 
-
-//      println("Implicit Dave's Messages")
-//      println(davesMessages.list.mkString("\n"))
-//      println(altDavesMessages.list.mkString("\n"))
-//      println("Explicit Dave's Messages\nx\n")
-//
-//      println(x.list.mkString("\n"))
-//      println("Explicit Dave's Messages \ny\n")
-//      println(y.list.mkString("\n"))
       println("Explicit Dave's Messages \nz\n")
       println(z.list.mkString("\n"))
   }
