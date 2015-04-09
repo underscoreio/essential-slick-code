@@ -180,19 +180,9 @@ object ImplicitJoinsExample extends App {
       } yield msg -> usr
       */
 
-      lazy val y = for {
-        (m1, u) <- messages leftJoin users on (_.senderId === _.id)
-        (m2, r) <- messages leftJoin rooms on (_.roomId === _.id)
-        if m1.id === m2.id && u.id === daveId && r.id === airLockId && r.id.? === m1.roomId
-      } yield m1
-
-      lazy val z = messages.
-        leftJoin(users).
-        leftJoin(rooms).
-        on { case ((m, u), r) => m.senderId === u.id && m.roomId === r.id }.
-        filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
-        map { case ((m, u), r) => m }
-
+      //
+      //      Difference between left and right joins.
+      //
       //      lazy val left = for {
       //        (usrs, occ) <- users leftJoin occupants on (_.id === _.userId)
       //      } yield usrs.name -> occ.roomId.?
@@ -212,21 +202,9 @@ object ImplicitJoinsExample extends App {
         case (_, group) => (group.map(_.id).max, group.map(_.id).min)
       }
 
-      //http://stackoverflow.com/questions/27049646/how-to-select-max-min-in-same-query-in-slick/27055250#27055250
-      //println(firstAndLastMessage.selectStatement)
-      //println(firstAndLastMessage.list.mkString("\n","\n","\n"))
+      println(userRooms.list.mkString("\n","\n","\n"))
 
-      //println(userRooms.selectStatement)
 
-      //println(userRooms.list.mkString("\n","\n","\n"))
-
-      //      println(davesMessages.list.mkString("\n", "\n", "\n"))
-      //      println(left.selectStatement)
-      //      println(left.list.mkString("\n", "\n", "\n"))
-      //      println(right.selectStatement)
-      //      println(right.list.mkString("\n", "\n", "\n"))
-      //      println(inner.selectStatement)
-      //      println(inner.list.mkString("\n", "\n", "\n"))
 
   }
 
