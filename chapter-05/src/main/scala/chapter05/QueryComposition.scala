@@ -12,7 +12,7 @@ object PKs {
   case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
 }
 
-object ImplicitJoinsExample extends App {
+object QueryComposition extends App {
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
@@ -139,71 +139,6 @@ object ImplicitJoinsExample extends App {
       messages ++= Seq(
         Message(frankId, "Well, whaddya think?", podConversation, MessagePK(0L), None, Some(podId), 2),
         Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, MessagePK(0L), None, Some(podId), 2))
-
-      //implicit join
-      val davesMessages = for {
-        message <- messages
-        user    <- message.sender
-        room    <- message.room
-        if user.id       === daveId &&
-          room.id        === airLockId &&
-          message.roomId === room.id
-      } yield message
-
-      val altDavesMessages = for {
-        message <- messages
-        if message.senderId === daveId &&
-          message.roomId    === airLockId
-      } yield message
-
-      //explicit join
-      lazy val left = messages.
-        leftJoin(users).
-        leftJoin(rooms).
-        on { case ((m, u), r) => m.senderId === u.id && m.roomId === r.id }.
-        filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
-        map { case ((m, u), r) => m }
-
-      lazy val right = for {
-        ((msgs, usrs), rms) <- messages rightJoin users on (_.senderId === _.id) rightJoin rooms on (_._1.roomId === _.id)
-        if usrs.id === daveId && rms.id === airLockId && rms.id === msgs.roomId
-      } yield msgs
-
-      lazy val inner = for {
-        ((msgs, usrs), rms) <- messages innerJoin users on (_.senderId === _.id) leftJoin rooms on (_._1.roomId === _.id)
-        if usrs.id === daveId && rms.id === airLockId && rms.id.? === msgs.roomId
-      } yield msgs
-
-      /* H2 doesn't support FULL OUTER JOINS at the time of writing.
-      lazy val outer = for {
-        (msg, usr) <- messages outerJoin users on (_.senderId.? === _.id.?)
-      } yield msg -> usr
-      */
-
-      //
-      //      Difference between left and right joins.
-      //
-      //      lazy val left = for {
-      //        (usrs, occ) <- users leftJoin occupants on (_.id === _.userId)
-      //      } yield usrs.name -> occ.roomId.?
-      //
-      //      lazy val right = for {
-      //        (usrs, occ) <- users rightJoin occupants on (_.id === _.userId)
-      //      } yield usrs.name -> occ.roomId
-
-      lazy val userRooms = for {
-        ((u, o), r) <- users.
-          rightJoin(occupants).
-          rightJoin(rooms).
-          on { case ((u, o), r) => u.id === o.userId && r.id === o.roomId }
-      } yield (u.name, r.title)
-
-      lazy val firstAndLastMessage = messages.filter(_.senderId === daveId).groupBy { _ => true }.map {
-        case (_, group) => (group.map(_.id).max, group.map(_.id).min)
-      }
-
-      println(userRooms.list.mkString("\n","\n","\n"))
-
 
 
   }
