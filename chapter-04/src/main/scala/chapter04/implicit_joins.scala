@@ -152,25 +152,33 @@ object ImplicitJoinsExample extends App {
 
       val altDavesMessages = for {
         message <- messages
-        if message.senderId === daveId &&
-          message.roomId    === airLockId
+        user    <- users
+        if message.senderId === user.id &&
+           message.roomId   === airLockId &&
+           user.id          === daveId
       } yield message
 
       //explicit join
-      lazy val left = messages.
+      lazy val leftJoinJoin = messages.
         leftJoin(users).
         leftJoin(rooms).
         on { case ((m, u), r) => m.senderId === u.id && m.roomId === r.id }.
         filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
         map { case ((m, u), r) => m }
 
+      lazy val left = messages.
+        leftJoin(users).on(_.senderId === _.id).
+        leftJoin(rooms).on{ case ((m,u),r) => m.roomId === r.id}.
+        filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
+        map { case ((m, u), r) => m }
+
       lazy val right = for {
-        ((msgs, usrs), rms) <- messages rightJoin users on (_.senderId === _.id) rightJoin rooms on (_._1.roomId === _.id)
+        ((msgs, usrs), rms) <- messages rightJoin users on (_.senderId === _.id) rightJoin rooms on { case ((m,u),r) =>  m.roomId === r.id}
         if usrs.id === daveId && rms.id === airLockId && rms.id === msgs.roomId
       } yield msgs
 
       lazy val inner = for {
-        ((msgs, usrs), rms) <- messages innerJoin users on (_.senderId === _.id) leftJoin rooms on (_._1.roomId === _.id)
+        ((msgs, usrs), rms) <- messages innerJoin users on (_.senderId === _.id) innerJoin rooms on (_._1.roomId === _.id)
         if usrs.id === daveId && rms.id === airLockId && rms.id.? === msgs.roomId
       } yield msgs
 
@@ -202,7 +210,10 @@ object ImplicitJoinsExample extends App {
         case (_, group) => (group.map(_.id).max, group.map(_.id).min)
       }
 
-      println(userRooms.list.mkString("\n","\n","\n"))
+      val zip = for {
+       (u,r) <-  users zip rooms
+     } yield u.name -> r.title
+
 
 
 
