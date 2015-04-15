@@ -169,11 +169,20 @@ object ImplicitJoinsExample extends App {
 
       */
 
-
-
-
       //implicit join
-      val davesMessages = for {
+      val q = for {
+        msg <- messages
+        usr <- msg.sender
+      } yield (usr.name, msg.content)
+
+      val q1 = for {
+        msg <- messages
+        usr <- users
+        if usr.id === msg.senderId
+      } yield (usr.name, msg.content)
+
+
+      val davesMessagesUsingFK = for {
         message <- messages
         user    <- message.sender
         room    <- message.room
@@ -182,13 +191,16 @@ object ImplicitJoinsExample extends App {
           message.roomId === room.id
       } yield message
 
-      val altDavesMessages = for {
-        message <- messages
-        user    <- users
-        if message.senderId === user.id &&
-           message.roomId   === airLockId &&
-           user.id          === daveId
-      } yield message
+
+      val davesMessages = for {
+            message <- messages
+            user    <- users
+            room    <- rooms
+            if message.senderId === user.id &&
+               message.roomId   === room.id &&
+               user.id          === daveId  &&
+               room.id          === airLockId
+         } yield message
 
       //explicit join
       lazy val leftJoinJoin = messages.
@@ -237,6 +249,10 @@ object ImplicitJoinsExample extends App {
      } yield u.name -> r.title
 
 
+     List(left,right,inner).foreach{ q =>
+       println(q.selectStatement)
+       println(q.list.mkString("\n","\n","\n"))
+     }
 
 
   }
