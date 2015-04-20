@@ -104,6 +104,7 @@ object PlainQueries extends App {
       implicit session ⇒
 
         (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
+        (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach { println }
 
     }
 
@@ -124,32 +125,46 @@ object PlainQueries extends App {
       val airLock = Room("Air Lock")
       val pod = Room("Pod")
 
-      def insertU(u: User) = sqlu""" insert into user values (${u.name} ,  ${u.email})""".first
-      def insertR(r: Room) = (Q.u + "insert into room values (" +? r.title  +? ")").execute
-
       //Can we pass kind of PI into an implicit?
       implicit val getUserIdResult = GetResult(r ⇒ PI[UserTable](r.nextLong()))
       implicit val getRoomIdResult = GetResult(r ⇒ PI[RoomTable](r.nextLong()))
 
+      implicit val getMessageIdResult = GetResult(r ⇒ PI[MessageTable](r.nextLong()))
+      implicit val getDateTime = GetResult(r ⇒ new DateTime(r.nextTimestamp(), UTC))
+
+      implicit val getOptionalUserIdResult: GetResult[Option[PI[UserTable]]] = GetResult(r ⇒ r.nextLongOption().map(i ⇒ PI[UserTable](i)))
+      implicit val getOptionalRoomIdResult: GetResult[Option[PI[RoomTable]]] = GetResult(r ⇒ r.nextLongOption().map(i ⇒ PI[RoomTable](i)))
+
+      implicit val getMessage = GetResult(r ⇒ Message(senderPI = r.<<,
+                                                      content   = r.<<,
+                                                      ts        = r.<<,
+                                                      id        = r.<<,
+                                                      toPI      = r.<<?,
+                                                      roomPI    = r.<<?,
+                                                      readBy    = r.<<))
+
+      def insertU(u: User) = sqlu""" insert into "user" values (${u.id}, ${u.name}, ${u.email})""".first
+      def insertR(r: Room) = (Q.u + "insert into \"room\" values (" +? r.title +? ")").execute
+
       //Yes yes it's evil.
-      def idU(u: User): PI[UserTable] = sql"""select id from user where email = ${u.email}""".as[PI[UserTable]].first
-      def idR(r: Room): PI[RoomTable] = sql"""select id from room where title = ${r.title}""".as[PI[RoomTable]].first
+      def idU(u: User): PI[UserTable] = sql"""select id from "user" where email = ${u.email}""".as[PI[UserTable]].first
+      def idR(r: Room): PI[RoomTable] = sql"""select id from "room" where title = ${r.title}""".as[PI[RoomTable]].first
 
       insertU(dave)
       insertU(hal)
       insertU(elena)
       insertU(frank)
 
-      val davePI:  PI[UserTable] = idU(dave)
-      val halPI:   PI[UserTable] = idU(hal)
+      val davePI: PI[UserTable] = idU(dave)
+      val halPI: PI[UserTable] = idU(hal)
       val elenaPI: PI[UserTable] = idU(elena)
       val frankPI: PI[UserTable] = idU(frank)
 
-     insertR(airLock)
-     insertR(pod)
+      insertR(airLock)
+      insertR(pod)
 
       val airLockPI: PI[RoomTable] = idR(airLock)
-      val podPI: PI[RoomTable]     = idR(pod)
+      val podPI: PI[RoomTable] = idR(pod)
 
       // Populate Rooms
       occupants ++= List(Occupant(airLockPI, davePI),
@@ -174,26 +189,12 @@ object PlainQueries extends App {
         Message(frankPI, "Well, whaddya think?", podConversation, PI(0L), None, Some(podPI), 2),
         Message(davePI, "I'm not sure, what do you think?", podConversation plusSeconds 4, PI(0L), None, Some(podPI), 2))
 
-       implicit val getMessageIdResult = GetResult(r ⇒ PI[MessageTable](r.nextLong()))
-       implicit val getDateTime = GetResult(r ⇒  new DateTime(r.nextTimestamp(), UTC))
-
-       implicit val getOptionalUserIdResult:GetResult[Option[PI[UserTable]]] = GetResult(r ⇒ r.nextLongOption().map( i => PI[UserTable](i)))
-       implicit val getOptionalRoomIdResult:GetResult[Option[PI[RoomTable]]] = GetResult(r ⇒ r.nextLongOption().map( i => PI[RoomTable](i)))
-
-       implicit val getMessage = GetResult(r ⇒ Message( senderPI  = r.<<,
-                                                        content   = r.<<,
-                                                        ts        = r.<<,
-                                                        id        = r.<<,
-                                                        toPI      = r.<<?,
-                                                        roomPI    = r.<<?,
-                                                        readBy    = r.<<))
-
-       val davesAirLockMessages = sql"""select *
+      val davesAirLockMessages = sql"""select *
               from "message" left outer join "user" on "message"."sender" = "user"."id"
                              left outer join "room" on "message"."room"   = "room"."id"
               where "user"."id" = ${davePI} and "room"."id" = ${airLockPI}"""
 
-              davesAirLockMessages.execute.foreach( println)
+      davesAirLockMessages.as[Message].list.foreach { println }
 
     }
 
