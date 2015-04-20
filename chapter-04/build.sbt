@@ -11,10 +11,8 @@ scalacOptions ++= Seq(
   "-feature",
   "-language:implicitConversions",
   "-language:postfixOps",
-  "-Ywarn-dead-code",
-  "-Xlint",
-  "-Xfatal-warnings"
-  )
+  "-Ywarn-dead-code"
+)
 
 
 libraryDependencies ++= Seq(
