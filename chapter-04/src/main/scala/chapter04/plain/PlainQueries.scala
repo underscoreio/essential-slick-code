@@ -58,8 +58,19 @@ object PlainQueries extends App {
         def apply(pk: Id[RoomTable], pp: PositionedParameters) { pp.setLong(pk.value) }
       }
 
-      implicit object SetUserTableALLTHETHINGS extends SetParameter[Id[UserTable]] {
-        def apply(pk: Id[UserTable], pp: PositionedParameters) { pp.setLong(pk.value) }
+      implicit object SetUserRoomTablePk extends SetParameter[(Id[UserTable],Id[RoomTable])] {
+        def apply(pk: (Id[UserTable],Id[RoomTable]), pp: PositionedParameters) {
+          pp.setLong(pk._1.value)
+          pp.setLong(pk._2.value)
+          }
+      }
+
+      implicit object SetUserTableALLTHETHINGS extends SetParameter[(Option[Id[UserTable]],String,Option[String])] {
+        def apply(pk: (Option[Id[UserTable]],String,Option[String]), pp: PositionedParameters) {
+            pp.setLongOption(pk._1.map(_.value))
+            pp.setString(pk._2.value)
+            pp.setStringOption(pk._3.value)
+          }
       }
 
       implicit val getMessage = GetResult(r ⇒ Message(senderId = r.<<,

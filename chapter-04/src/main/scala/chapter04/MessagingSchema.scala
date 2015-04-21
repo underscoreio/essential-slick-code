@@ -35,19 +35,6 @@ object MessagingSchema {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
-//    case class People(id: Option[Long], name: String, email: Option[String] = None)
-//
-//    class PeopleTable(tag: Tag) extends Table[People](tag, "user") {
-//      def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
-//      def name = column[String]("name")
-//      def email = column[Option[String]]("email")
-//
-//      def * = (id.?, name, email) <> (People.tupled, People.unapply)
-//    }
-//
-//    lazy val people = TableQuery[PeopleTable]
-//    lazy val insertPeople = users returning users.map(_.id)
-
     case class Room(title: String, id: Id[RoomTable] = Id[RoomTable](0L))
 
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
