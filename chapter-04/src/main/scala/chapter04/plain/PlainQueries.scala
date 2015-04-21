@@ -73,13 +73,13 @@ object PlainQueries extends App {
           }
       }
 
-      implicit val getMessage = GetResult(r ⇒ Message(senderId = r.<<,
-        content = r.<<,
-        ts = r.<<,
-        id = r.<<,
-        toId = r.<<?,
-        roomId = r.<<?,
-        readBy = r.<<))
+      implicit val getMessage = GetResult(r ⇒ Message(senderId  = r.<<,
+                                                      content   = r.<<,
+                                                      ts        = r.<<,
+                                                      id        = r.<<,
+                                                      toId      = r.<<?,
+                                                      roomId    = r.<<?,
+                                                      readBy    = r.<<))
 
       def insertU(u: User) = sqlu""" insert into "user" values (${u.id}, ${u.name}, ${u.email})""".first
       def insertR(r: Room) = (Q.u + "insert into \"room\" values (" +? r.title +? ")").execute
@@ -93,8 +93,8 @@ object PlainQueries extends App {
       insertU(elena)
       insertU(frank)
 
-      val daveId: Id[UserTable] = idU(dave)
-      val halId: Id[UserTable] = idU(hal)
+      val daveId: Id[UserTable]  = idU(dave)
+      val halId: Id[UserTable]   = idU(hal)
       val elenaId: Id[UserTable] = idU(elena)
       val frankId: Id[UserTable] = idU(frank)
 
@@ -102,7 +102,7 @@ object PlainQueries extends App {
       insertR(pod)
 
       val airLockId: Id[RoomTable] = idR(airLock)
-      val podId: Id[RoomTable] = idR(pod)
+      val podId: Id[RoomTable]     = idR(pod)
 
       // Populate Rooms
       occupants ++= List(Occupant(airLockId, daveId),
