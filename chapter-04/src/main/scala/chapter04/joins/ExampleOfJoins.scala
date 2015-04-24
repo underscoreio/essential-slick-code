@@ -25,8 +25,8 @@ object ExampleOfJoins extends App {
       val frankId: Id[UserTable] = insertUser += User(None, "Frank", Some("frank@example.org"))
 
       // rooms:
-      val airLockId: Id[RoomTable] = insertRoom += Room("Air Lock")
-      val podId:     Id[RoomTable] = insertRoom += Room("Pod")
+      val airLockId: Id[RoomTable] = insertRoom += Room(None,"Air Lock")
+      val podId:     Id[RoomTable] = insertRoom += Room(None,"Pod")
 
       // Put Dave in the Room:
       occupants ++= List(Occupant(airLockId, daveId),
