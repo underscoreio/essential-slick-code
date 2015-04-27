@@ -54,20 +54,12 @@ object HListExampleApp extends App {
 
   lazy val users = TableQuery[UserTable]
 
-//  case class EmailContact(name: String, email: String)
-//
-//  def contacts =
-//    users.<>[User,EmailContact](
-//        hlist => EmailContact(hlist(0), hlist(6)),
-//        contact => None: Option[User] )
-
-
   // Database connection details:
   def db = Database.forURL("jdbc:h2:mem:chapter03", driver = "org.h2.Driver")
 
   db.withSession {
     implicit session ⇒
-      // Create the tables:
+
       users.ddl.create
 
       users +=
@@ -78,22 +70,8 @@ object HListExampleApp extends App {
             "HAL" :: "Betty" :: 0L :: HNil
 
 
-            println(
-              users.list
-             )
-
-       val dave: User = users.first
-
-
-       val name: String = dave.head
-       val age: Int = dave.apply(1)
-
-       val index: Nat = Nat(99)
-
-       println(dave.apply(index))
-
-
-     //  println( dave(99) )
-
-  }
+      println(
+        users.list
+       )
+    }
 }

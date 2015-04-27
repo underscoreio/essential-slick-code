@@ -88,10 +88,5 @@ object ForeignKeyExample extends App {
       } yield (usr.name, msg.content)
 
       println("Result of join: "+q.run)
-
-      // Example CASCADE DELETE:
-      println("Rows deleted: "+users.filter(_.name === "HAL").delete)
-      println("Messages after delete: "+messages.run)
   }
-
 }

@@ -44,16 +44,7 @@ object NullExample extends App {
       val halId:  Long = insertUser += User("HAL")
       val elena:  Long = insertUser += User("Elena", Some("elena@example.org"))
 
-      val oe: Option[String] =  Some("dave@example.org")
-      val e: String = "dave@example.org"
 
-
-      def filterByEmail(email: Option[String]) =
-        users.filter(u => u.email.isEmpty || u.email === email)
-
-     println( filterByEmail(Some("elena@example.org")).run )
-     //println( filterByEmail(None).run )
-
+  
   }
-
 }

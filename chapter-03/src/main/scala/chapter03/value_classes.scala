@@ -90,5 +90,4 @@ object ValueClassesExample extends App {
        // Won't compile:
        // users.filter(_.id === 6L).run
   }
-
 }

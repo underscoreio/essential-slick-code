@@ -73,7 +73,7 @@ object PKExample extends App {
       val airLockId: Long = insertRoom += Room("Air Lock")
 
       // Put Dave in the Room:
-      occupants += Occupant(daveId, airLockId)
+      occupants += Occupant(airLockId, daveId)
 
       println(occupants.list)
   }

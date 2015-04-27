@@ -109,5 +109,4 @@ object CustomBooleanExample extends App {
        messages.filter(_.priority === (HighPriority:Priority)).run
      )
   }
-
 }

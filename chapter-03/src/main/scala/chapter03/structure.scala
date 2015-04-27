@@ -43,7 +43,7 @@ trait Tables {
 // Bring all the components together:
 class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-object Main extends App {
+object StructureExample extends App {
 
   // A specific schema with a particular driver:
   val schema = new Schema(scala.slick.driver.H2Driver)

@@ -114,5 +114,4 @@ object SumTypesExample extends App {
        messages.filter(_.flag === (Important : Flag)).run
      )
   }
-
 }
