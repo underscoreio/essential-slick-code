@@ -8,7 +8,7 @@
   <logger name="scala.slick"                              level="INFO"/>
   <logger name="scala.slick.ast"                          level="INFO"/>
   <logger name="scala.slick.compiler"                     level="INFO"/>
-  <logger name="scala.slick.jdbc.JdbcBackend.statement"   level="INFO"/>
+  <logger name="scala.slick.jdbc.JdbcBackend.statement"   level="DEBUG"/>
   <logger name="scala.slick.jdbc.StatementInvoker.result" level="INFO"/>
 
   <root level="INFO">

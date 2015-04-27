@@ -11,6 +11,7 @@ import MessagingSchema._
 
 object PlainQueries extends App {
 
+/*
   def printStatements: DB ⇒ Unit = { info ⇒
     val schema = new Schema(info.driver)
 
@@ -147,5 +148,5 @@ object PlainQueries extends App {
     printStatements(db)
     println("============================================")
   }
-
+*/
 }

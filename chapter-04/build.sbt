@@ -24,3 +24,5 @@ libraryDependencies ++= Seq(
   "ch.qos.logback"      % "logback-classic"       % "1.1.2",
   "joda-time"           % "joda-time"             % "2.6",
   "org.joda"            % "joda-convert"          % "1.2")
+
+triggeredMessage in ThisBuild := Watched.clearWhenTriggered

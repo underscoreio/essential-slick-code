@@ -51,4 +51,12 @@ The examples are:
 
 ## Chapter 4 (Joins and Aggregates)
 
-TODO
+This project contains a _chat_schema.scala_ file that defines the schema for the chapter.
+It also defines the method `populate` which inserts our standard cast, rooms, and messages into the database.
+
+The schema is re-used in the following examples:
+
+1. `chater04.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
+
+
+

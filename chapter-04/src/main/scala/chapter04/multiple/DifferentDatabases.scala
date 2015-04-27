@@ -5,6 +5,7 @@ import scala.slick.driver.JdbcDriver
 import MessagingSchema._
 
 object DifferentDatabases extends App {
+ /*
 
   def printStatements: DB ⇒ Unit = { info ⇒
     val schema = new Schema(info.driver)
@@ -47,5 +48,7 @@ object DifferentDatabases extends App {
     printStatements(db)
     println("============================================")
   }
+
+*/
 
 }
