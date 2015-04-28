@@ -22,6 +22,10 @@ object JoinsExample extends App {
       val airLockId: PK[RoomTable] = rooms.filter(_.title === "Air Lock").map(_.id).first
       val podId:     PK[RoomTable] = rooms.filter(_.title === "Pod").map(_.id).first
 
+      //
+      // Implicit Joins
+      //
+
       /*
       val implicitJoin = for {
         msg <- messages
@@ -31,6 +35,8 @@ object JoinsExample extends App {
       implicitJoin.run.foreach(result => println(result))
       */
 
+
+      /*
       // Dave's messages example:
 
       val davesMessages = for {
@@ -41,7 +47,7 @@ object JoinsExample extends App {
            message.roomId   === room.id &&
            user.id          === daveId  &&
            room.id          === airLockId
-      } yield message
+      } yield (message.content, user.name, room.title)
 
       davesMessages.run.foreach(result => println(result))
 
@@ -50,25 +56,59 @@ object JoinsExample extends App {
         user    <- message.sender
         room    <- message.room
         if user.id === daveId &&
-           room.id === airLockId
-      } yield message
+           room.id === airLockId fs
+      } yield (message.content, user.name, room.title)
 
       davesMessagesWithFKs.run.foreach(result => println(result))
+      */
 
 
+      //
+      // Explicit Joins
+      //
 
-/*
+      /*
+      // Taste of the syntax:
+      val syntax = messages innerJoin users on (_.senderId === _.id)
+      val syntaxQuery = syntax.map { case (msg, user) => (msg.content, user.name)  }
+      syntaxQuery.run.foreach(result => println(result))
+      */
 
 
-TODO....
+      // Inner join:
+      
+      /*
+      // A version reaching into the tuple...
+      val inner0 =
+        messages.
+        innerJoin(users).on(_.senderId === _.id).
+        innerJoin(rooms).on(_._1.roomId === _.id)
 
-      //explicit join
-      lazy val leftJoinJoin = messages.
+      // ... or naming the tuple elements:
+      val inner =
+        messages.
+        innerJoin(users).on(_.senderId === _.id).
+        innerJoin(rooms).on{ case ((msg,user), room) => msg.roomId === room.id}
+
+      val innerQ = for {
+        ((msgs, usrs), rms) <- inner
+        if usrs.id === daveId && rms.id === airLockId
+      } yield (msgs.content, usrs.name, rms.title)
+
+      innerQ.run.foreach(result => println(result))
+      */
+      
+      
+      /*
+
+
+      lazy val leftJoin = messages.
         leftJoin(users).
         leftJoin(rooms).
         on { case ((m, u), r) => m.senderId === u.id && m.roomId === r.id }.
         filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
         map { case ((m, u), r) => m }
+
 
       lazy val left = messages.
         leftJoin(users).on(_.senderId === _.id).
@@ -81,10 +121,6 @@ TODO....
         if usrs.id === daveId && rms.id === airLockId && rms.id === msgs.roomId
       } yield msgs
 
-      lazy val inner = for {
-        ((msgs, usrs), rms) <- messages innerJoin users on (_.senderId === _.id) innerJoin rooms on (_._1.roomId === _.id)
-        if usrs.id === daveId && rms.id === airLockId && rms.id.? === msgs.roomId
-      } yield msgs
 
       // H2 doesn't support FULL OUTER JOINS at the time of writing.
       //lazy val outer = for {
