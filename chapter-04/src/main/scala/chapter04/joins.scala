@@ -90,6 +90,7 @@ object JoinsExample extends App {
         innerJoin(users).on(_.senderId === _.id).
         innerJoin(rooms).on{ case ((msg,user), room) => msg.roomId === room.id}
 
+    
       val innerQ = for {
         ((msgs, usrs), rms) <- inner
         if usrs.id === daveId && rms.id === airLockId
@@ -98,24 +99,40 @@ object JoinsExample extends App {
       innerQ.run.foreach(result => println(result))
       */
       
-      
+      // Left outer:
+  
       /*
-
-
-      lazy val leftJoin = messages.
+      val left = messages.
+        leftJoin(users).on(_.toId === _.id).
+        map { case (m, u) => (m.content, u.name.?) }
+        
+      left.run.foreach(result => println(result))
+      
+      
+      // It's possible to place all the `on` clauses together...
+      
+      val allLeftWithRooms = messages.
         leftJoin(users).
         leftJoin(rooms).
-        on { case ((m, u), r) => m.senderId === u.id && m.roomId === r.id }.
-        filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
-        map { case ((m, u), r) => m }
+        on  { case ((m, u), r) => m.toId === u.id && m.roomId === r.id }.
+        map { case ((m, u), r) => (m.content, u.name.?, r.title.?) }
+    
+      allLeftWithRooms.run.foreach(result => println(result))
+       
+      // ...but this is joining all the users and all the rooms first.  
+      // That will produces a different result from:
+        
+      val leftWithRooms = messages.
+        leftJoin(users).on(_.toId === _.id).
+        leftJoin(rooms).on { case ((m, u), r) => m.roomId === r.id }.
+        map { case ((m, u), r) => (m.content, u.name.?, r.title.?) }
+        
+     leftWithRooms.run.foreach(result => println(result))
+     */
+      
 
-
-      lazy val left = messages.
-        leftJoin(users).on(_.senderId === _.id).
-        leftJoin(rooms).on{ case ((m,u),r) => m.roomId === r.id}.
-        filter { case ((m, u), r) => u.id === daveId && r.id === airLockId }.
-        map { case ((m, u), r) => m }
-
+/*
+     
       lazy val right = for {
         ((msgs, usrs), rms) <- messages rightJoin users on (_.senderId === _.id) rightJoin rooms on { case ((m,u),r) =>  m.roomId === r.id}
         if usrs.id === daveId && rms.id === airLockId && rms.id === msgs.roomId
