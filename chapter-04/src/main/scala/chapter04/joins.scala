@@ -12,7 +12,7 @@ object JoinsExample extends App {
   db.withSession {
     implicit session =>
 
-      populate
+     populate
 
       val daveId:  PK[UserTable] = users.filter(_.name === "Dave").map(_.id).first
       val halId:   PK[UserTable] = users.filter(_.name === "HAL").map(_.id).first
@@ -26,15 +26,15 @@ object JoinsExample extends App {
       // Implicit Joins
       //
 
-      /*
       val implicitJoin = for {
         msg <- messages
         usr <- msg.sender
       } yield (usr.name, msg.content)
 
       implicitJoin.run.foreach(result => println(result))
-      */
 
+      // Further examples from the book appear below.
+      // Remove the comments around what you need.
 
       /*
       // Dave's messages example:
@@ -76,7 +76,7 @@ object JoinsExample extends App {
 
 
       // Inner join:
-      
+
       /*
       // A version reaching into the tuple...
       val inner0 =
@@ -90,7 +90,7 @@ object JoinsExample extends App {
         innerJoin(users).on(_.senderId === _.id).
         innerJoin(rooms).on{ case ((msg,user), room) => msg.roomId === room.id}
 
-    
+
       val innerQ = for {
         ((msgs, usrs), rms) <- inner
         if usrs.id === daveId && rms.id === airLockId
@@ -98,76 +98,39 @@ object JoinsExample extends App {
 
       innerQ.run.foreach(result => println(result))
       */
-      
+
       // Left outer:
-  
+
       /*
       val left = messages.
         leftJoin(users).on(_.toId === _.id).
         map { case (m, u) => (m.content, u.name.?) }
-        
-      left.run.foreach(result => println(result))
-      
-      
-      // It's possible to place all the `on` clauses together...
-      
-      val allLeftWithRooms = messages.
-        leftJoin(users).
-        leftJoin(rooms).
-        on  { case ((m, u), r) => m.toId === u.id && m.roomId === r.id }.
-        map { case ((m, u), r) => (m.content, u.name.?, r.title.?) }
-    
-      allLeftWithRooms.run.foreach(result => println(result))
-       
-      // ...but this is joining all the users and all the rooms first.  
-      // That will produces a different result from:
-        
-      val leftWithRooms = messages.
-        leftJoin(users).on(_.toId === _.id).
-        leftJoin(rooms).on { case ((m, u), r) => m.roomId === r.id }.
-        map { case ((m, u), r) => (m.content, u.name.?, r.title.?) }
-        
-     leftWithRooms.run.foreach(result => println(result))
-     */
-      
 
-/*
-     
-      lazy val right = for {
-        ((msgs, usrs), rms) <- messages rightJoin users on (_.senderId === _.id) rightJoin rooms on { case ((m,u),r) =>  m.roomId === r.id}
-        if usrs.id === daveId && rms.id === airLockId && rms.id === msgs.roomId
-      } yield msgs
+      left.run.foreach(result => println(result))
+      */
+
+      // Right outer:
+
+      /*
+      val right = for {
+        (msg, user) <- messages.rightJoin(users).on(_.toId === _.id)
+      } yield (user.name, msg.content.?)
+
+      right.run.foreach(result => println(result))
+      */
+
+
+      // Without an `on`, you have a cross join:
+      //(messages leftJoin users).run.foreach(println)
 
 
       // H2 doesn't support FULL OUTER JOINS at the time of writing.
-      //lazy val outer = for {
-    //    (msg, usr) <- messages outerJoin users on (_.senderId.? === _.id.?)
-    //  } yield msg -> usr
+      /*
+      val outer = for {
+        (room, msg) <- rooms outerJoin messages on (_.id === _.roomId)
+      } yield room.title.? -> msg.content.?
 
-
-
-      lazy val userRooms = for {
-        ((u, o), r) <- users.
-          rightJoin(occupants).
-          rightJoin(rooms).
-          on { case ((u, o), r) => u.id === o.userId && r.id === o.roomId }
-      } yield (u.name, r.title)
-
-      lazy val firstAndLastMessage = messages.filter(_.senderId === daveId).groupBy { _ => true }.map {
-        case (_, group) => (group.map(_.id).max, group.map(_.id).min)
-      }
-
-      val zip = for {
-       (u,r) <-  users zip rooms
-     } yield u.name -> r.title
-
-
-     List(left,right,inner).foreach{ q =>
-       println(q.selectStatement)
-       println(q.list.mkString("\n","\n","\n"))
-     }
-*/
-
+      outer.run.foreach(println)
+      */
   }
-
 }

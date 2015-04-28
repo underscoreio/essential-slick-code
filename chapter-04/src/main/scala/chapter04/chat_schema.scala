@@ -104,6 +104,7 @@ object MessagingSchema {
       // rooms:
       val airLockId: PK[RoomTable] = insertRoom += Room("Air Lock")
       val podId:     PK[RoomTable] = insertRoom += Room("Pod")
+      val brainId:   PK[RoomTable] = insertRoom += Room("Brain Room")
 
       // Put Dave in the Room:
       occupants ++= List(
@@ -124,11 +125,17 @@ object MessagingSchema {
         Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", airLockConversation plusSeconds 6, Some(airLockId)))
 
 
+      // A few messages in the Pod:
       val podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
 
       messages ++= Seq(
         Message(frankId, "Well, whaddya think?", podConversation, Some(podId)),
         Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, Some(podId)))
+        
+      // And private (direct messages)
+      messages ++= Seq(
+        Message(frankId, "Are you thinking what I'm thinking?", podConversation, Some(podId), toId=Some(daveId)),
+        Message(daveId, "Maybe", podConversation plusSeconds 4, Some(podId), toId=Some(frankId)))
     }
   }
 
