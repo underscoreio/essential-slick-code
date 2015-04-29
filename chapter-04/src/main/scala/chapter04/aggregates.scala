@@ -30,8 +30,7 @@ object AggregatesExample extends App {
      val last: Option[DateTime] = messages.map(_.ts).max.run
      println(s"Last sent: $last")
           
-    // Group by:
-        
+     // Group by:   
      val msgsPerUser = 
         messages.join(users).on(_.senderId === _.id).
         groupBy { case (msg, user)  => user.name }.
@@ -39,7 +38,18 @@ object AggregatesExample extends App {
         run
      println(s"Messages per user: $msgsPerUser")
         
-        
+     // Grouping by multiple columns:
+     val msgsPerRoomPerUser = 
+        rooms.
+        join(messages).on(_.id === _.roomId).
+        join(users).on{ case ((room,msg), user) => user.id === msg.senderId }.
+        groupBy { case ((room,msg), user)   => (room.title, user.name) }.
+        map     { case ((room,user), group) => (room, user, group.length) }.
+        sortBy  { case (room, user, group) => room }.
+        run
+     println(s"Messages per room per user: $msgsPerRoomPerUser")
+     
+  
      // More involved grouping:
      val stats = 
         messages.join(users).on(_.senderId === _.id).
