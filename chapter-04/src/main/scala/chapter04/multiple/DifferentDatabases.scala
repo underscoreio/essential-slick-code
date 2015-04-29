@@ -2,7 +2,7 @@ package chapter04
 package multiple
 
 import scala.slick.driver.JdbcDriver
-import MessagingSchema._
+import ChatSchema._
 
 object DifferentDatabases extends App {
  /*

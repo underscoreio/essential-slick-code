@@ -8,7 +8,7 @@ import scala.slick.lifted.MappedTo
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone._
 
-object MessagingSchema {
+object ChatSchema {
 
   case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
@@ -134,8 +134,8 @@ object MessagingSchema {
         
       // And private (direct messages)
       messages ++= Seq(
-        Message(frankId, "Are you thinking what I'm thinking?", podConversation, Some(podId), toId=Some(daveId)),
-        Message(daveId, "Maybe", podConversation plusSeconds 4, Some(podId), toId=Some(frankId)))
+        Message(frankId, "Are you thinking what I'm thinking?", podConversation plusSeconds 6, Some(podId), toId=Some(daveId)),
+        Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
     }
   }
 

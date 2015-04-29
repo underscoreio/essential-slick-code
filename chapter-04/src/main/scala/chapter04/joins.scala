@@ -1,7 +1,7 @@
 package chapter04
 
 import org.joda.time._
-import chapter04.MessagingSchema._
+import ChatSchema._
 
 object JoinsExample extends App {
 
@@ -33,6 +33,7 @@ object JoinsExample extends App {
 
       implicitJoin.run.foreach(result => println(result))
 
+          
       // Further examples from the book appear below.
       // Remove the comments around what you need.
 
@@ -132,5 +133,17 @@ object JoinsExample extends App {
 
       outer.run.foreach(println)
       */
+           
+      // Zip Join
+      
+      /*
+      val msgs = messages.sortBy(_.ts asc)
+      val conversations = msgs zip msgs.drop(1)
+      
+      val zipResults: List[(String,String)] = 
+        conversations.map{ case (fst, snd) =>  fst.content -> snd.content }.list
+      
+      println(zipResults)  
+     */ 
   }
 }
