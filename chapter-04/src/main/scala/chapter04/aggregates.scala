@@ -13,8 +13,6 @@ object AggregatesExample extends App {
     implicit session =>
 
      populate
-
-     messages.delete.run
      
      // Count:
      val numRows: Int = messages.length.run
@@ -31,8 +29,34 @@ object AggregatesExample extends App {
      // Last message date:
      val last: Option[DateTime] = messages.map(_.ts).max.run
      println(s"Last sent: $last")
+          
+    // Group by:
+        
+     val msgsPerUser = 
+        messages.join(users).on(_.senderId === _.id).
+        groupBy { case (msg, user)  => user.name }.
+        map     { case (name, group) => name -> group.length }.
+        run
+     println(s"Messages per user: $msgsPerUser")
+        
+        
+     // More involved grouping:
+     val stats = 
+        messages.join(users).on(_.senderId === _.id).
+        groupBy { case (msg, user)   => user.name }.
+        map     { case (name, group) => (name, group.length, group.map{ case (msg, user) => msg.ts}.min) }
      
-   
+     println(s"Stats: ${stats.run}")
+     
+     // Extracting functions:
+     import scala.language.higherKinds
+     def timestampOf[S[_]](group: Query[(MessageTable,UserTable), (Message,User), S]) =
+       group.map{ case (msg, user) => msg.ts}
+     
+     val nicerStats = 
+        messages.join(users).on(_.senderId === _.id).
+        groupBy { case (msg, user)   => user.name }.
+        map     { case (name, group) => (name, group.length, timestampOf(group).min) }
      
   }
 }
