@@ -9,6 +9,7 @@ import scala.slick.jdbc._
 import ChatSchema._
 object PlainQueries extends App {
 
+  //DB_CLOSE_DELAY=-1 keeps in the memory database live across the life of the JVM
   val dbURL   = "jdbc:h2:mem:chapter05;DB_CLOSE_DELAY=-1;"
   val dbDriver = "org.h2.Driver"
 
@@ -17,10 +18,7 @@ object PlainQueries extends App {
   def db = Database.forURL(dbURL,dbDriver)
 
   //Create and populate the database as we have done in the previous chapters
-  db.withSession {
-    implicit session =>
-     populate
-  }
+  db.withSession {  implicit session => populate }
 
   import scala.slick.driver.JdbcDriver.backend.{ Database ⇒ DDB }
   import Database.dynamicSession

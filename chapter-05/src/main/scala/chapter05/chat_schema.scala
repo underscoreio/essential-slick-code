@@ -23,14 +23,15 @@ object ChatSchema {
 
     import profile.simple._
 
-    case class User(name: String, email: Option[String] = None, id: Id[UserTable] = Id(0))
+
+    case class User(id: Id[UserTable] = Id(0),name: String, email: Option[String] = None)
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
       def id    = column[Id[UserTable]]("id", O.AutoInc, O.PrimaryKey)
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (name, email, id) <> (User.tupled, User.unapply)
+      def * = (id,name, email) <> (User.tupled, User.unapply)
     }
 
     lazy val users = TableQuery[UserTable]
@@ -91,13 +92,13 @@ object ChatSchema {
     //
     // The following implicit declarations are needs for sql interpolation
     //
-    implicit val getUserIdResult    = GetResult(r => Id[UserTable](r.nextLong()))
-    implicit val getRoomIdResult    = GetResult(r => Id[RoomTable](r.nextLong()))
+      implicit val getUserIdResult    = GetResult(r => Id[UserTable](r.<<))
+      implicit val getRoomIdResult    = GetResult(r => Id[RoomTable](r.nextLong()))
     implicit val getMessageIdResult = GetResult(r => Id[MessageTable](r.nextLong()))
     implicit val getDateTime        = GetResult(r => new DateTime(r.nextTimestamp(), DateTimeZone.UTC))
     implicit val getOptionalUserIdResult: GetResult[Option[Id[UserTable]]] = GetResult(r => r.nextLongOption().map(i => Id[UserTable](i)))
-    implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult(r => r.nextLongOption().map(i => Id[RoomTable](i)))
-
+    //implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult(r => r.nextLongOption().map(i => Id[RoomTable](i)))
+    implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult( _ <<?)
     implicit object SetUserTablePk extends SetParameter[Id[UserTable]] {
       def apply(pk: Id[UserTable], pp: PositionedParameters) { pp.setLong(pk.value) }
     }
@@ -136,10 +137,10 @@ object ChatSchema {
       (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
 
       // A few users:
-      val daveId:  Id[UserTable] = insertUser += User("Dave", Some("dave@example.org"))
-      val halId:   Id[UserTable] = insertUser += User("HAL")
-      val elenaId: Id[UserTable] = insertUser += User("Elena", Some("elena@example.org"))
-      val frankId: Id[UserTable] = insertUser += User("Frank", Some("frank@example.org"))
+      val daveId:  Id[UserTable] = insertUser += User(name = "Dave", email = Some("dave@example.org"))
+      val halId:   Id[UserTable] = insertUser += User(name = "HAL")
+      val elenaId: Id[UserTable] = insertUser += User(name = "Elena",email = Some("elena@example.org"))
+      val frankId: Id[UserTable] = insertUser += User(name = "Frank",email = Some("frank@example.org"))
 
       // rooms:
       val airLockId: Id[RoomTable] = insertRoom += Room("Air Lock")
