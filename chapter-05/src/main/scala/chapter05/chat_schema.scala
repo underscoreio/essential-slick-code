@@ -121,6 +121,11 @@ object ChatSchema {
                                                      roomId    = r.<<?,
                                                      toId      = r.<<?))
 
+    //case class User(name: String, email: Option[String] = None, id: Id[UserTable] = Id(0))
+    implicit val getUser = GetResult(r => User(name  =  r <<,
+                                               email = r <<?,
+                                               id    = r <<))
+
     // Sample data set
     def populate(implicit session: Session): Unit = {
 

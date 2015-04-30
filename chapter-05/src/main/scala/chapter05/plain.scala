@@ -42,6 +42,14 @@ object PlainQueries extends App {
 
       results.foreach(result => println(result))
 
+//      Robert tables example
+//      def userByEmail(email:String) = sql"""select * from "user" where "user"."email" = '#${email}'"""
+//
+//      val ohDear = userByEmail("""';DROP TABLE "user";--- """).as[User].list
+//
+//      results.foreach(result => println(result))
+//
+//      sql"""select * from "user" """.as[User].list.foreach(result => println(result))
 
   }
 }
