@@ -1,5 +1,5 @@
 package chapter05
-package plain
+
 
 import org.joda.time._
 
@@ -9,7 +9,7 @@ import scala.slick.jdbc._
 import ChatSchema._
 object PlainQueries extends App {
 
-  val dbURL   = "jdbc:h2:mem:chapter05;DB_CLOSE_DELAY=-1 "
+  val dbURL   = "jdbc:h2:mem:chapter05;DB_CLOSE_DELAY=-1;"
   val dbDriver = "org.h2.Driver"
 
   val schema = new Schema(scala.slick.driver.H2Driver)
@@ -29,8 +29,8 @@ object PlainQueries extends App {
   DDB.forURL(dbURL,dbDriver) withDynSession {
     import Q.interpolation
 
-     val daveId:Id[UserTable]    = Id(1)
-     val airLockId:Id[UserTable] = Id(1)
+     val daveId:Id[RoomTable]    = Id(1)
+     val airLockId               = 1
 
       val plainSQL = sql"""
                     select *
