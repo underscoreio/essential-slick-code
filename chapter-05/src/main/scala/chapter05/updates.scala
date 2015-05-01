@@ -10,7 +10,7 @@ object PlainUpdatesExample extends App {
 
   val schema = new Schema(scala.slick.driver.H2Driver)
   import schema._, profile.simple._
-  def db = Database.forURL("jdbc:h2:mem:chapter04", driver="org.h2.Driver")
+  def db = Database.forURL("jdbc:h2:mem:chapter05", driver="org.h2.Driver")
 
   db.withSession { implicit session => 
   
@@ -31,11 +31,12 @@ object PlainUpdatesExample extends App {
     println(s"Exclamation mark added sensitively to $sensitiveRows rows")
     
     // Using DateTime as an example of a custom type
-    implicit object SetDateTime extends SetParameter[DateTime] {
-      def apply(dt: DateTime, pp: PositionedParameters): Unit =
-         pp >> new Timestamp(dt.getMillis)
-        // pp.setTimestamp(new Timestamp(dt.getMillis))  
-    }
+    
+    implicit val SetDateTime = SetParameter[DateTime](  
+      //(dt, pp) => pp.setTimestamp(new Timestamp(dt.getMillis))  
+       (dt, pp) => pp >> new Timestamp(dt.getMillis) 
+     )
+
     val now = sqlu"""UPDATE message SET "ts" = """ +? DateTime.now
    
   }
