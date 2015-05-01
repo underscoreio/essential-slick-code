@@ -4,11 +4,7 @@ import java.sql.Timestamp
 import scala.slick.driver.JdbcDriver
 import scala.slick.lifted.MappedTo
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone._
-import scala.slick.jdbc.GetResult
-import scala.slick.jdbc.PositionedParameters
-import org.joda.time.DateTimeZone
-import scala.slick.jdbc.SetParameter
+import org.joda.time.DateTimeZone.UTC
 
 object ChatSchema {
 
@@ -89,49 +85,11 @@ object ChatSchema {
 
     lazy val messages = TableQuery[MessageTable]
 
-    //
-    // The following implicit declarations are needs for sql interpolation
-    //
-    implicit val getUserIdResult    = GetResult(r => Id[UserTable](r.<<))
-    implicit val getRoomIdResult    = GetResult(r => Id[RoomTable](r.nextLong()))
-    implicit val getMessageIdResult = GetResult(r => Id[MessageTable](r.nextLong()))
-    implicit val getDateTime        = GetResult(r => new DateTime(r.nextTimestamp(), DateTimeZone.UTC))
-    implicit val getOptionalUserIdResult: GetResult[Option[Id[UserTable]]]   = GetResult(r => r.nextLongOption().map(i => Id[UserTable](i)))
-    //implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult(r => r.nextLongOption().map(i => Id[RoomTable](i)))
-    implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]]   = GetResult( _ <<?)
-    implicit object SetUserTablePk extends SetParameter[Id[UserTable]] {
-      def apply(pk: Id[UserTable], pp: PositionedParameters) { pp.setLong(pk.value) }
-    }
-
-    implicit object SetOptionUserTablePk extends SetParameter[Option[Id[UserTable]]] {
-      def apply(pk: Option[Id[UserTable]], pp: PositionedParameters) { pp.setLongOption(pk.map(_.value)) }
-    }
-
-    implicit object SetRoomTablePk extends SetParameter[Id[RoomTable]] {
-      def apply(pk: Id[RoomTable], pp: PositionedParameters) { pp.setLong(pk.value) }
-    }
-
-    implicit object SetOptionRoomTablePk extends SetParameter[Option[Id[RoomTable]]] {
-      def apply(pk: Option[Id[RoomTable]], pp: PositionedParameters) { pp.setLongOption(pk.map(_.value)) }
-    }
-
-    implicit val getMessage = GetResult(r => Message(senderId  = r.<<,
-                                                     content   = r.<<,
-                                                     ts        = r.<<,
-                                                     id        = r.<<,
-                                                     roomId    = r.<<?,
-                                                     toId      = r.<<?))
-
-    //case class User(name: String, email: Option[String] = None, id: Id[UserTable] = Id(0))
-    implicit val getUser = GetResult(r => User(name  =  r <<,
-                                               email = r <<?,
-                                               id    = r <<))
-
     // Sample data set
     def populate(implicit session: Session): Unit = {
 
       // Print the schema:
-      (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
+      // (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
 
       // Execute the schema:
       (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
