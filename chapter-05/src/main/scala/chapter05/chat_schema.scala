@@ -92,13 +92,13 @@ object ChatSchema {
     //
     // The following implicit declarations are needs for sql interpolation
     //
-      implicit val getUserIdResult    = GetResult(r => Id[UserTable](r.<<))
-      implicit val getRoomIdResult    = GetResult(r => Id[RoomTable](r.nextLong()))
+    implicit val getUserIdResult    = GetResult(r => Id[UserTable](r.<<))
+    implicit val getRoomIdResult    = GetResult(r => Id[RoomTable](r.nextLong()))
     implicit val getMessageIdResult = GetResult(r => Id[MessageTable](r.nextLong()))
     implicit val getDateTime        = GetResult(r => new DateTime(r.nextTimestamp(), DateTimeZone.UTC))
-    implicit val getOptionalUserIdResult: GetResult[Option[Id[UserTable]]] = GetResult(r => r.nextLongOption().map(i => Id[UserTable](i)))
+    implicit val getOptionalUserIdResult: GetResult[Option[Id[UserTable]]]   = GetResult(r => r.nextLongOption().map(i => Id[UserTable](i)))
     //implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult(r => r.nextLongOption().map(i => Id[RoomTable](i)))
-    implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]] = GetResult( _ <<?)
+    implicit val getOptionalRoomIdResult: GetResult[Option[Id[RoomTable]]]   = GetResult( _ <<?)
     implicit object SetUserTablePk extends SetParameter[Id[UserTable]] {
       def apply(pk: Id[UserTable], pp: PositionedParameters) { pp.setLong(pk.value) }
     }
