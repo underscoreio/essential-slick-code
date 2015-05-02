@@ -1,11 +1,9 @@
-package chapter01
-
 // Import the Slick interface for H2:
 import scala.slick.driver.H2Driver.simple._
 
 object Example extends App {
 
-  // Case class representing a message:
+  // Case class representing a row in our table:
   final case class Message(
     sender: String,
     content: String,
@@ -13,9 +11,9 @@ object Example extends App {
 
   // Helper method for creating test data:
   def freshTestData = Seq(
-    Message("Dave", "Hello, HAL. Do you read me, HAL?"            ),
-    Message("HAL",  "Affirmative, Dave. I read you."              ),
-    Message("Dave", "Open the pod bay doors, HAL."                ),
+    Message("Dave", "Hello, HAL. Do you read me, HAL?"),
+    Message("HAL",  "Affirmative, Dave. I read you."),
+    Message("Dave", "Open the pod bay doors, HAL."),
     Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.")
   )
 
@@ -39,7 +37,7 @@ object Example extends App {
 
   // Create a permanent in-memory H2 database;
   def db = Database.forURL(
-    url    = "jdbc:h2:mem:db;DB_CLOSE_DELAY=-1",
+    url    = "jdbc:h2:mem:chat-database;DB_CLOSE_DELAY=-1",
     driver = "org.h2.Driver")
 
   // Connect to the database...

@@ -12,6 +12,6 @@ libraryDependencies ++= Seq(
 
 initialCommands in console := """
   |import scala.slick.driver.H2Driver.simple._
-  |import chapter01.Example._
+  |import Example._
   |Example.main(Array())
 """.trim.stripMargin
