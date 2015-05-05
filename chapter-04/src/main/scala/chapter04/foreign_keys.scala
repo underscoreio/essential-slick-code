@@ -1,4 +1,4 @@
-package chapter03
+package chapter04
 
 import java.sql.Timestamp
 import org.joda.time.DateTime
@@ -6,7 +6,7 @@ import org.joda.time.DateTimeZone.UTC
 import scala.slick.lifted.ProvenShape
 import scala.slick.lifted.ForeignKeyQuery
 
-object ModifiersExample extends App {
+object ForeignKeyExample extends App {
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
@@ -22,16 +22,13 @@ object ModifiersExample extends App {
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
 
-    case class User(name: String, avatar: Option[Array[Byte]] = None, id: Long = 0L)
+    case class User(name: String, id: Long = 0L)
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
-      def id     = column[Long]("id", O.PrimaryKey, O.AutoInc)
-      def name   = column[String]("name", O.Length(64, true), O.Default("Anonymous Coward"))
-      def avatar = column[Option[Array[Byte]]]("avatar", O.DBType("BINARY(2048)"))
+      def id   = column[Long]("id", O.PrimaryKey, O.AutoInc)
+      def name = column[String]("name")
 
-      def nameIndex = index("name_idx", (name,avatar), unique=true)
-
-      def * = (name, avatar, id) <> (User.tupled, User.unapply)
+      def * = (name, id) <> (User.tupled, User.unapply)
     }
 
     lazy val users = TableQuery[UserTable]
@@ -72,8 +69,8 @@ object ModifiersExample extends App {
       (messages.ddl ++ users.ddl).create
 
       // Users:
-      val halId:  Long = insertUser += User("HAL")
       val daveId: Long = insertUser += User("Dave")
+      val halId:  Long = insertUser += User("HAL")
 
       // Insert the conversation, which took place in Feb, 2001:
       val start = new DateTime(2001, 2, 17, 10, 22, 50)
@@ -91,9 +88,5 @@ object ModifiersExample extends App {
       } yield (usr.name, msg.content)
 
       println("Result of join: "+q.run)
-
-      // Example CASCADE DELETE:
-      println("Rows deleted: "+users.filter(_.name === "HAL").delete)
-      println("Messages after delete: "+messages.run)
   }
 }

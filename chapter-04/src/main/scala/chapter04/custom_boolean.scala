@@ -1,10 +1,10 @@
-package chapter03
+package chapter04
 
 import java.sql.Timestamp
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
 
-object ValueClassesExample extends App {
+object CustomBooleanExample extends App {
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
@@ -39,19 +39,36 @@ object ValueClassesExample extends App {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
+    sealed trait Priority
+    case object HighPriority extends Priority
+    case object LowPriority  extends Priority
+
+    implicit val priorityType =
+      MappedColumnType.base[Priority, String](
+        flag => flag match {
+          case HighPriority => "y"
+          case LowPriority  => "n"
+        },
+        ch => ch match {
+          case "Y" | "y" | "+" | "high"          => HighPriority
+          case "N" | "n" | "-" | "lo"   | "low"  => LowPriority
+      })
+
     case class Message(
         senderId: UserPK,
         content:  String,
         ts:       DateTime,
+        flag:     Option[Priority] = None,
         id:       MessagePK = MessagePK(0L))
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
       def id       = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
       def senderId = column[UserPK]("sender")
       def content  = column[String]("content")
+      def priority = column[Option[Priority]]("priority")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, priority, id) <> (Message.tupled, Message.unapply)
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
     }
@@ -85,9 +102,11 @@ object ValueClassesExample extends App {
         Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
         Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
         Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
-        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
+        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6, Some(HighPriority))
+        )
 
-       // Won't compile:
-       // users.filter(_.id === 6L).run
+     println(
+       messages.filter(_.priority === (HighPriority:Priority)).run
+     )
   }
 }

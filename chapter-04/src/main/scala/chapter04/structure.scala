@@ -1,4 +1,4 @@
-package chapter03
+package chapter04
 
 import java.sql.Timestamp
 import org.joda.time.DateTime

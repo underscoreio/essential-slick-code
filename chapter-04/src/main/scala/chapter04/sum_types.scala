@@ -1,10 +1,10 @@
-package chapter03
+package chapter04
 
 import java.sql.Timestamp
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
 
-object CustomBooleanExample extends App {
+object SumTypesExample extends App {
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
@@ -39,36 +39,41 @@ object CustomBooleanExample extends App {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
-    sealed trait Priority
-    case object HighPriority extends Priority
-    case object LowPriority  extends Priority
 
-    implicit val priorityType =
-      MappedColumnType.base[Priority, String](
-        flag => flag match {
-          case HighPriority => "y"
-          case LowPriority  => "n"
+    sealed trait Flag
+    case object Important extends Flag
+    case object Offensive extends Flag
+    case object Spam extends Flag
+    // case object OffTopic extends Flag
+
+    implicit val flagType =
+      MappedColumnType.base[Flag, Char](
+        f => f match {
+          case Important => '!'
+          case Offensive => 'X'
+          case Spam      => '$'
         },
-        ch => ch match {
-          case "Y" | "y" | "+" | "high"          => HighPriority
-          case "N" | "n" | "-" | "lo"   | "low"  => LowPriority
-      })
+        c => c match {
+          case '!' => Important
+          case 'X' => Offensive
+          case '$' => Spam
+        })
 
     case class Message(
         senderId: UserPK,
         content:  String,
         ts:       DateTime,
-        flag:     Option[Priority] = None,
+        flag:     Option[Flag] = None,
         id:       MessagePK = MessagePK(0L))
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
       def id       = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
       def senderId = column[UserPK]("sender")
       def content  = column[String]("content")
-      def priority = column[Option[Priority]]("priority")
+      def flag     = column[Option[Flag]]("flag")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, priority, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, flag, id) <> (Message.tupled, Message.unapply)
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
     }
@@ -102,11 +107,11 @@ object CustomBooleanExample extends App {
         Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
         Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
         Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
-        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6, Some(HighPriority))
+        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6, Some(Important))
         )
 
      println(
-       messages.filter(_.priority === (HighPriority:Priority)).run
+       messages.filter(_.flag === (Important : Flag)).run
      )
   }
 }

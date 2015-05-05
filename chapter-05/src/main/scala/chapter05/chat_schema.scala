@@ -1,14 +1,16 @@
 package chapter05
 
 import java.sql.Timestamp
+
 import scala.slick.driver.JdbcDriver
 import scala.slick.lifted.MappedTo
+
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone.UTC
+import org.joda.time.DateTimeZone._
 
 object ChatSchema {
 
-  case class Id[A](value: Long) extends AnyVal with MappedTo[Long]
+  case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
@@ -19,24 +21,23 @@ object ChatSchema {
 
     import profile.simple._
 
-
-    case class User(id: Id[UserTable] = Id(0),name: String, email: Option[String] = None)
+    case class User(name: String, email: Option[String] = None, id: PK[UserTable] = PK(0))
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
-      def id    = column[Id[UserTable]]("id", O.AutoInc, O.PrimaryKey)
+      def id    = column[PK[UserTable]]("id", O.AutoInc, O.PrimaryKey)
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (id,name, email) <> (User.tupled, User.unapply)
+      def * = (name, email, id) <> (User.tupled, User.unapply)
     }
 
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
-    case class Room(title: String, id: Id[RoomTable] = Id(0L))
+    case class Room(title: String, id: PK[RoomTable] = PK(0L))
 
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
-      def id    = column[Id[RoomTable]]("id", O.PrimaryKey, O.AutoInc)
+      def id    = column[PK[RoomTable]]("id", O.PrimaryKey, O.AutoInc)
       def title = column[String]("title")
       def * = (title, id) <> (Room.tupled, Room.unapply)
     }
@@ -44,11 +45,11 @@ object ChatSchema {
     lazy val rooms = TableQuery[RoomTable]
     lazy val insertRoom = rooms returning rooms.map(_.id)
 
-    case class Occupant(roomId: Id[RoomTable], userId: Id[UserTable])
+    case class Occupant(roomId: PK[RoomTable], userId: PK[UserTable])
 
     class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
-      def roomId = column[Id[RoomTable]]("room")
-      def userId = column[Id[UserTable]]("user")
+      def roomId = column[PK[RoomTable]]("room")
+      def userId = column[PK[UserTable]]("user")
       def pk   = primaryKey("occ_room_user_pk", (roomId, userId))
       def user = foreignKey("occ_user_fk", userId, users)(_.id)
       def room = foreignKey("occ_room_fk", roomId, rooms)(_.id)
@@ -62,20 +63,20 @@ object ChatSchema {
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
 
-    case class Message(senderId: Id[UserTable],
+    case class Message(senderId: PK[UserTable],
                        content: String,
                        ts: DateTime,
-                       roomId: Option[Id[RoomTable]] = None,
-                       toId: Option[Id[UserTable]]   = None,
-                       id: Id[MessageTable]          = Id(0L) )
+                       roomId: Option[PK[RoomTable]] = None,
+                       toId: Option[PK[UserTable]]   = None,
+                       id: PK[MessageTable]          = PK(0L) )
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-      def id       = column[Id[MessageTable]]("id", O.PrimaryKey, O.AutoInc)
-      def senderId = column[Id[UserTable]]("sender")
+      def id       = column[PK[MessageTable]]("id", O.PrimaryKey, O.AutoInc)
+      def senderId = column[PK[UserTable]]("sender")
       def content  = column[String]("content")
       def ts       = column[DateTime]("ts")
-      def roomId   = column[Option[Id[RoomTable]]]("room") // in a particular room? or broadcast?
-      def toId     = column[Option[Id[UserTable]]]("to")   // direct message?
+      def roomId   = column[Option[PK[RoomTable]]]("room") // in a particular room? or broadcast?
+      def toId     = column[Option[PK[UserTable]]]("to")   // direct message?
       def * = (senderId, content, ts, roomId, toId, id) <> (Message.tupled, Message.unapply)
 
       def sender = foreignKey("msg_sender_fk", senderId, users)(_.id)
@@ -89,21 +90,21 @@ object ChatSchema {
     def populate(implicit session: Session): Unit = {
 
       // Print the schema:
-      // (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
+      (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
 
       // Execute the schema:
       (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
 
       // A few users:
-      val daveId:  Id[UserTable] = insertUser += User(name = "Dave", email = Some("dave@example.org"))
-      val halId:   Id[UserTable] = insertUser += User(name = "HAL")
-      val elenaId: Id[UserTable] = insertUser += User(name = "Elena",email = Some("elena@example.org"))
-      val frankId: Id[UserTable] = insertUser += User(name = "Frank",email = Some("frank@example.org"))
+      val daveId:  PK[UserTable] = insertUser += User("Dave", Some("dave@example.org"))
+      val halId:   PK[UserTable] = insertUser += User("HAL")
+      val elenaId: PK[UserTable] = insertUser += User("Elena", Some("elena@example.org"))
+      val frankId: PK[UserTable] = insertUser += User("Frank", Some("frank@example.org"))
 
       // rooms:
-      val airLockId: Id[RoomTable] = insertRoom += Room("Air Lock")
-      val podId:     Id[RoomTable] = insertRoom += Room("Pod")
-      val brainId:   Id[RoomTable] = insertRoom += Room("Brain Room")
+      val airLockId: PK[RoomTable] = insertRoom += Room("Air Lock")
+      val podId:     PK[RoomTable] = insertRoom += Room("Pod")
+      val brainId:   PK[RoomTable] = insertRoom += Room("Brain Room")
 
       // Put Dave in the Room:
       occupants ++= List(

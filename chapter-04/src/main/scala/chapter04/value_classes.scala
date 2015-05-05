@@ -1,31 +1,36 @@
-package chapter03
+package chapter04
 
 import java.sql.Timestamp
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
-import scala.slick.lifted.ProvenShape
-import scala.slick.lifted.ForeignKeyQuery
 
-object ForeignKeyExample extends App {
+object ValueClassesExample extends App {
 
   trait Profile {
     val profile: scala.slick.driver.JdbcProfile
+  }
+
+  object PKs {
+    import scala.slick.lifted.MappedTo
+    case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
+    case class UserPK(value: Long) extends AnyVal with MappedTo[Long]
   }
 
   trait Tables {
     this: Profile =>
 
     import profile.simple._
+    import PKs._
 
     implicit val jodaDateTimeType =
       MappedColumnType.base[DateTime, Timestamp](
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
 
-    case class User(name: String, id: Long = 0L)
+    case class User(name: String, id: UserPK = UserPK(0L))
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
-      def id   = column[Long]("id", O.PrimaryKey, O.AutoInc)
+      def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
       def * = (name, id) <> (User.tupled, User.unapply)
@@ -35,14 +40,14 @@ object ForeignKeyExample extends App {
     lazy val insertUser = users returning users.map(_.id)
 
     case class Message(
-        senderId: Long,
+        senderId: UserPK,
         content:  String,
         ts:       DateTime,
-        id:       Long = 0L)
+        id:       MessagePK = MessagePK(0L))
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-      def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
-      def senderId = column[Long]("sender")
+      def id       = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
+      def senderId = column[UserPK]("sender")
       def content  = column[String]("content")
       def ts       = column[DateTime]("ts")
 
@@ -60,6 +65,7 @@ object ForeignKeyExample extends App {
   val schema = new Schema(scala.slick.driver.H2Driver)
 
   import schema._, profile.simple._
+  import PKs._
 
   def db = Database.forURL("jdbc:h2:mem:chapter03", driver = "org.h2.Driver")
 
@@ -69,8 +75,8 @@ object ForeignKeyExample extends App {
       (messages.ddl ++ users.ddl).create
 
       // Users:
-      val daveId: Long = insertUser += User("Dave")
-      val halId:  Long = insertUser += User("HAL")
+      val halId  = insertUser += User("HAL")
+      val daveId = insertUser += User("Dave")
 
       // Insert the conversation, which took place in Feb, 2001:
       val start = new DateTime(2001, 2, 17, 10, 22, 50)
@@ -81,12 +87,7 @@ object ForeignKeyExample extends App {
         Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
         Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
 
-      // A simple join using the foreign key:
-      val q = for {
-        msg <- messages
-        usr <- msg.sender
-      } yield (usr.name, msg.content)
-
-      println("Result of join: "+q.run)
+       // Won't compile:
+       // users.filter(_.id === 6L).run
   }
 }

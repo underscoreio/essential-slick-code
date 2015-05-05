@@ -1,4 +1,4 @@
-package chapter03
+package chapter04
 
 object NestedCaseClassExampleApp extends App {
 

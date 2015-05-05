@@ -1,4 +1,4 @@
-package chapter03
+package chapter04
 
 object NullExample extends App {
 
@@ -45,6 +45,6 @@ object NullExample extends App {
       val elena:  Long = insertUser += User("Elena", Some("elena@example.org"))
 
 
-  
+
   }
 }
