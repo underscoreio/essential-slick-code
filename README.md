@@ -15,13 +15,26 @@ For example:
 
 ```
 $ cd chapter-01
-$ sbt
-[info] Loading project definition from chapter-01/project
-[info] Set current project to essential-slick-chapter-01
+$ $ ./sbt.sh
+...
 > run
-[info] Running chapter01.Example
-Vector(Message(HAL,Affirmative, Dave. I read you.,2001-02-17T10:22:52.000Z,2), Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,2001-02-17T10:22:56.000Z,4))
-[success] Total time: 1 s, completed 27-Apr-2015 15:02:59
+...
+[info] Running Example
+Creating database table
+
+Inserting test data
+
+Selecting all messages:
+Message(Dave,Hello, HAL. Do you read me, HAL?,1)
+Message(HAL,Affirmative, Dave. I read you.,2)
+Message(Dave,Open the pod bay doors, HAL.,3)
+Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,4)
+
+Selecting only messages from HAL:
+Message(HAL,Affirmative, Dave. I read you.,2)
+Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,4)
+[success] Total time: 5 s, completed 06/05/2015 2:22:22 PM
+
 ```
 
 ## Chapter 3 (Data Modelling)
