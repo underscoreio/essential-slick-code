@@ -1,15 +1,28 @@
 # Source Code to Accompany _Essential Slick_.
 
+## About the Book
+
+_Essential Slick_ provides a compact, no-nonsense guide to everything you need to know to use Slick in a commercial setting:
+
+*    Chapter 1 provides an abbreviated overview of the library as a whole, demonstrating the fundamentals of data modelling, connecting to the database, and running queries.
+*    Chapter 2 covers basic select queries, introducing Slick’s query language and delving into some of the details of type inference and type checking.
+*    Chapter 3 covers queries for inserting, updating, and deleting data.
+*    Chapter 4 discusses data modelling, including defining custom column and table types.
+*    Chapter 5 explores advanced select queries, including joins and aggregates.
+*    Chapter 6 provides a brief overview of Plain SQL queries—a useful tool when you need fine control over the SQL sent to your database.
+
+To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/training/courses/essential-slick/).
+
+This first edition is for Slick 2.1
+
+## About the Code
+
+The code is organised as a folder for each chapter. Each folder contains an SBT project.
+
+Each file is either the examples from the book, or the scaffolding for the exercises.
 
 
-To run the examples, you need to [install SBT](http://www.scala-sbt.org/release/tutorial/Setup.html).
-
-There's a folder for each chapter, and each folder contains an SBT project.
-
-Each file is either the example from the book, or the scaffolding for the exercises.
-
-
-## Chapter 1 (Basics), 2 (Selecting Data) and 3 (Creating and Modifying Data)
+### Chapter 1 (Basics), 2 (Selecting Data) and 3 (Creating and Modifying Data)
 
 These projects contain a single source file, _main.scala_. Use the SBT `run` or `~run` command.
 
@@ -39,7 +52,7 @@ Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,4)
 
 ```
 
-## Chapter 4 (Data Modelling)
+### Chapter 4 (Data Modelling)
 
 Chapter 4 contains several applications. Using the SBT `run` command will prompt you for the file to run.
 
@@ -47,7 +60,7 @@ Alternatively, use `runMain` or `~runMail` and supply the name of the class to r
 
 ```
 $ cd chapter-04
-$ sbt
+$ ./sbt.sh
 > ~runMain chapter04.StructureExample
 ```
 
@@ -64,7 +77,7 @@ The examples are:
 9.  `chapter04.ModifiersExample` in _modifiers.scala_ -
 10. `chapter04.CustomBooleanExample` in _custom_boolean.scala_ - is the "Custom Boolean" exercise code.
 
-## Chapter 5 (Joins and Aggregates)
+### Chapter 5 (Joins and Aggregates)
 
 This project contains a _chat_schema.scala_ file that defines the schema for the chapter.
 It also defines the method `populate` which inserts our standard cast, rooms, and messages into the database.
@@ -72,9 +85,13 @@ It also defines the method `populate` which inserts our standard cast, rooms, an
 The schema is re-used in the following examples:
 
 1. `chapter05.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
+2. `chapter05.AggregatesExample` in _aggregates.scala_ - various group by and aggregation examples..
 
 
-## Chapter 6 (Plain SQL)
+_joins.scala_ contains much that is commented out.  Remove the comments from around the code you are interest in to run it.
+
+
+### Chapter 6 (Plain SQL)
 
 This project contains two main examples:
 
