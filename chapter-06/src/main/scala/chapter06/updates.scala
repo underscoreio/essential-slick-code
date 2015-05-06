@@ -10,7 +10,7 @@ object PlainUpdatesExample extends App {
 
   val schema = new Schema(scala.slick.driver.H2Driver)
   import schema._, profile.simple._
-  def db = Database.forURL("jdbc:h2:mem:chapter05", driver="org.h2.Driver")
+  def db = Database.forURL("jdbc:h2:mem:chapter06", driver="org.h2.Driver")
 
   db.withSession { implicit session =>
 
