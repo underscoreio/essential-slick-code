@@ -1,5 +1,7 @@
 # Source Code to Accompany _Essential Slick_.
 
+
+
 To run the examples, you need to [install SBT](http://www.scala-sbt.org/release/tutorial/Setup.html).
 
 There's a folder for each chapter, and each folder contains an SBT project.
@@ -7,7 +9,7 @@ There's a folder for each chapter, and each folder contains an SBT project.
 Each file is either the example from the book, or the scaffolding for the exercises.
 
 
-## Chapter 1 (Basics), 2 (Selecting Data) and  3 (Creating and Modifying Data)
+## Chapter 1 (Basics), 2 (Selecting Data) and 3 (Creating and Modifying Data)
 
 These projects contain a single source file, _main.scala_. Use the SBT `run` or `~run` command.
 
@@ -69,10 +71,13 @@ It also defines the method `populate` which inserts our standard cast, rooms, an
 
 The schema is re-used in the following examples:
 
-1. `chater05.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
+1. `chapter05.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
 
 
 ## Chapter 6 (Plain SQL)
 
-TODO: Add contents
+This project contains two main examples:
+
+1. `chapter05.PlainSelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
+2. `chapter05.PlainUpdatesExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.
 
