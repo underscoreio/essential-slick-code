@@ -55,7 +55,7 @@ object PKExample extends App {
 
   import schema._, profile.simple._
 
-  def db = Database.forURL("jdbc:h2:mem:chapter03", driver = "org.h2.Driver")
+  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
 
   db.withSession {
     implicit session =>

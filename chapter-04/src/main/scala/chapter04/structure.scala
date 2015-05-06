@@ -23,7 +23,7 @@ trait Tables {
       ts => new DateTime(ts.getTime, UTC)
     )
 
-  // Row representation:
+  // Row and table definitions here as normal
   case class Message(sender: String, content: String, ts: DateTime, id: Long = 0L)
 
   final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
@@ -51,7 +51,7 @@ object StructureExample extends App {
   // Use the schema:
   import schema._, profile.simple._
 
-  def db = Database.forURL("jdbc:h2:mem:chapter03", driver="org.h2.Driver")
+  def db = Database.forURL("jdbc:h2:mem:chapter04", driver="org.h2.Driver")
 
   db.withSession {
     implicit session =>

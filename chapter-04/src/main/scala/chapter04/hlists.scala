@@ -55,7 +55,7 @@ object HListExampleApp extends App {
   lazy val users = TableQuery[UserTable]
 
   // Database connection details:
-  def db = Database.forURL("jdbc:h2:mem:chapter03", driver = "org.h2.Driver")
+  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
 
   db.withSession {
     implicit session ⇒
