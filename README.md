@@ -7,7 +7,7 @@ There's a folder for each chapter, and each folder contains an SBT project.
 Each file is either the example from the book, or the scaffolding for the exercises.
 
 
-## Chapter 1 (Basics) and 2 (Modifying Data)
+## Chapter 1 (Basics), 2 (Selecting Data) and  3 (Creating and Modifying Data)
 
 These projects contain a single source file, _main.scala_. Use the SBT `run` or `~run` command.
 
@@ -37,16 +37,16 @@ Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,4)
 
 ```
 
-## Chapter 3 (Data Modelling)
+## Chapter 4 (Data Modelling)
 
-Chapter 3 contains several applications. Using the SBT `run` command will prompt you for the file to run.
+Chapter 4 contains several applications. Using the SBT `run` command will prompt you for the file to run.
 
 Alternatively, use `runMain` or `~runMail` and supply the name of the class to run a particular example:
 
 ```
-$ cd chapter-03
+$ cd chapter-04
 $ sbt
-> ~runMain chapter03.StructureExample
+> ~runMain chapter04.StructureExample
 ```
 
 The examples are:
@@ -62,7 +62,7 @@ The examples are:
 9. `chapter03.ModifiersExample` in _modifiers.scala_ -
 10. `chapter03.CustomBooleanExample` in _custom_boolean.scala_ - is the "Custom Boolean" exercise code.
 
-## Chapter 4 (Joins and Aggregates)
+## Chapter 5 (Joins and Aggregates)
 
 This project contains a _chat_schema.scala_ file that defines the schema for the chapter.
 It also defines the method `populate` which inserts our standard cast, rooms, and messages into the database.
@@ -72,4 +72,7 @@ The schema is re-used in the following examples:
 1. `chater04.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
 
 
+## Chapter 6 (Plain SQL)
+
+TODO: Add contents
 
