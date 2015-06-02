@@ -1,92 +1,125 @@
 package chapter06
 
-import org.joda.time._
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.slick.backend._
-import scala.slick.jdbc._
-import scala.slick.jdbc.StaticQuery.interpolation
+import org.joda.time._
 
 import ChatSchema._
 
-object PlainSelectExample extends App {
+object SelectExample extends App {
 
-  val schema = new Schema(scala.slick.driver.H2Driver)
-  import schema._, profile.simple._
-  def db = Database.forURL("jdbc:h2:mem:chapter06", driver="org.h2.Driver")
+  val schema = new Schema(slick.driver.H2Driver)
+  import schema._, profile.api._
 
-  db withSession { implicit session =>
+  val db = Database.forConfig("chapter06")
 
-    populate
+  // Helper method for running a query in this example file
+  def exec[T](program: DBIO[T]): T =
+    Await.result(db.run(program), 2 seconds)
+
+  try {
 
     //
-    // Simple select examples
+    // Three simple select examples
     //
 
-    val roomIdsQuery = sql"""select "id" from "room" """.as[Long]
-    val roomIds = roomIdsQuery.list
-    println(roomIds)
+    // 1 - select all room IDs
+
+    val ids = exec {
+      for {
+        _     <- populate
+        query  = sql"""select "id" from "room" """.as[Long]
+        ids   <- query
+      } yield ids
+    }
+
+    println(s"Room IDs: $ids")
+
+    // 2 - Select room IDs and names
 
     val roomInfoQuery = sql""" select "id", "title" from "room" """.as[(Long,String)]
-    val roomInfo = roomInfoQuery.list
-    println(roomInfo)
+    val roomInfo = exec(roomInfoQuery)
+    println(s"Room information: $roomInfo")
+
+    // 3 - Select with a value substitution
 
     val t = "Pod"
-    println(
-     sql""" select "id", "title" from "room" where "title" = $t""".as[(Long,String)].firstOption
-    )
+    val podRoom = exec {
+     sql""" select "id", "title" from "room" where "title" = $t""".as[(Long,String)].headOption
+   }
+   println(s"Pod room: $podRoom")
 
-    //
-    // Get Result instance for DateTime
-    //
+   //
+   // Get Result instance for DateTime
+   //
 
-    implicit val GetDateTime = GetResult[DateTime](r => new DateTime(r.nextTimestamp(), DateTimeZone.UTC))
-    println(
-      sql""" select "ts" from "message" """.as[DateTime].list
-    )
+   import slick.jdbc.GetResult
 
-    //
-    // The following implicit declarations are needs for sql interpolation
-    //
+   implicit val GetDateTime =
+     GetResult[DateTime](r => new DateTime(r.nextTimestamp(), DateTimeZone.UTC))
 
-    implicit val GetUserId    = GetResult(r => Id[UserTable](r.nextLong))
-    implicit val GetMessageId = GetResult(r => Id[MessageTable](r.nextLong))
+   val timestamps = exec {
+     sql""" select "ts" from "message" """.as[DateTime]
+   }
+   println(s"Timestamps: $timestamps")
 
-    implicit val GetOptionalUserId = GetResult(r => r.nextLongOption.map(id => Id[UserTable](id)))
-    implicit val GetOptionalRoomId = GetResult(r => r.nextLongOption.map(id => Id[RoomTable](id)))
 
-    implicit val GetMessage = GetResult(r =>
-       Message(senderId  = r.<<,
-               content   = r.<<,
-               ts        = r.<<,
-               id        = r.<<,
-               roomId    = r.<<?,
-               toId      = r.<<?) )
+   //
+   // Longer Get Result example for the Message case class
+   //
 
-    val results: List[Message] =
-      sql""" select * from "message" """.as[Message].list
+   implicit val GetUserId    =
+     GetResult(r => Id[UserTable](r.nextLong))
 
-    results.foreach(result => println(result))
+   implicit val GetMessageId =
+     GetResult(r => Id[MessageTable](r.nextLong))
 
-    //
-    // Robert tables example
-    //
-    /*
-    def lookup(email: String) =
-      sql"""select "id" from "user" where "user"."email" = '#${email}' """
+   implicit val GetOptionalUserId =
+     GetResult(r => r.nextLongOption.map(id => Id[UserTable](id)))
 
-    // OK...
-    println(
-      lookup("dave@example.org").as[Long].firstOption
-    )
+   implicit val GetOptionalRoomId =
+     GetResult(r => r.nextLongOption.map(id => Id[RoomTable](id)))
 
-    // Evil...
-    lookup(""" ';DROP TABLE "user";--- """).as[Long].list
+   implicit val GetMessage = GetResult(r =>
+      Message(senderId  = r.<<,
+              content   = r.<<,
+              ts        = r.<<,
+              id        = r.<<,
+              roomId    = r.<<?,
+              toId      = r.<<?) )
 
-    // This will produce: .JdbcSQLException: Table "user" not found;
-    println(
-      lookup("dave@example.org").as[Long].firstOption
-    )
-    */
+   val results = exec {
+     sql""" select * from "message" """.as[Message]
+   }
 
-  }
+   results.foreach(result => println(result))
+
+/*
+
+   //
+   // Robert tables example
+   // You probably don't want to run this
+   //
+
+   def lookup(email: String) =
+     sql"""select "id" from "user" where "user"."email" = '#${email}' """
+
+   // OK...
+   println(
+     exec(lookup("dave@example.org").as[Long].headOption)
+   )
+
+   // Evil...
+   println(
+     exec(lookup(""" ';DROP TABLE "user";--- """).as[Long])
+   )
+
+   // This will produce: .JdbcSQLException: Table "user" not found;
+   println(
+     exec(lookup("dave@example.org").as[Long].headOption)
+   )
+*/
+  } finally db.close
 }
