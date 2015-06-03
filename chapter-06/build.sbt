@@ -1,4 +1,4 @@
-name := "essential-slick-chapter-05"
+name := "essential-slick-chapter-06"
 
 version := "3.0"
 
