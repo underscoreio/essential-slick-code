@@ -93,7 +93,7 @@ _joins.scala_ contains much that is commented out.  Remove the comments from aro
 
 ### Chapter 6 (Plain SQL)
 
-This project contains two main examples:
+This project contains the following examples:
 
 1. `chapter06.SelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
 2. `chapter06.UpdateExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.

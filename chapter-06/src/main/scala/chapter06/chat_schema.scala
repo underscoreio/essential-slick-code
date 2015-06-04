@@ -1,6 +1,6 @@
 package chapter06
 
-import slick.driver.JdbcDriver
+import slick.driver.{JdbcProfile, JdbcDriver}
 import slick.lifted.MappedTo
 
 import java.sql.Timestamp
@@ -141,6 +141,6 @@ object ChatSchema {
 
   }
 
-  class Schema(val profile: slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: JdbcProfile) extends Tables with Profile
   case class DB(driver: JdbcDriver, url: String, clazz: String)
 }
