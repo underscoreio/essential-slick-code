@@ -1,5 +1,9 @@
 // Import the Slick interface for H2:
-import scala.slick.driver.H2Driver.simple._
+import slick.driver.H2Driver.api._
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Example extends App {
 
@@ -25,8 +29,7 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
 
-    def * = (sender, content, id) <>
-      (Message.tupled, Message.unapply)
+    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
   }
 
   // Base query for querying the messages table:
@@ -37,24 +40,31 @@ object Example extends App {
 
   // Create a permanent in-memory H2 database;
   def db = Database.forURL(
-    url    = "jdbc:h2:mem:chat-database;DB_CLOSE_DELAY=-1",
+    url    = "jdbc:h2:mem:chapter01;DB_CLOSE_DELAY=-1",
     driver = "org.h2.Driver")
 
-  // Connect to the database...
-  db.withSession { implicit session =>
+  // Helper method for running a query in this example file
+  def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2 seconds)    
+    
+  try {
     // Create the "messages" table:
     println("Creating database table")
-    messages.ddl.create
-
+    exec(messages.schema.create)  
+    
     // Create and insert the test data:
     println("\nInserting test data")
-    messages ++= freshTestData
-
+    exec(messages ++= freshTestData)
+    
     // Run the test query and print the results:
     println("\nSelecting all messages:")
-    messages.run.foreach(println)
-
+    val msgs = exec( messages.result )
+    println(msgs.foreach { println } )
+    
     println("\nSelecting only messages from HAL:")
-    halSays.run.foreach(println)
-  }
+    val halsSaying = exec(halSays.result)
+    println(halsSaying.foreach { println } )    
+
+  } finally db.close
+  
+ 
 }
