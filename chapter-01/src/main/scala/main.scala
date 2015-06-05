@@ -39,9 +39,7 @@ object Example extends App {
   val halSays = messages.filter(_.sender === "HAL")
 
   // Create a permanent in-memory H2 database;
-  def db = Database.forURL(
-    url    = "jdbc:h2:mem:chapter01;DB_CLOSE_DELAY=-1",
-    driver = "org.h2.Driver")
+  val db = Database.forConfig("chapter01")
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2 seconds)    
