@@ -5,7 +5,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Example extends App {
+object Example  {
 
   // Case class representing a row in our table:
   final case class Message(
@@ -43,8 +43,8 @@ object Example extends App {
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2 seconds)    
-    
-  try {
+  
+  def main(args:Array[String]) = {
     // Create the "messages" table:
     println("Creating database table")
     exec(messages.schema.create)  
@@ -55,14 +55,9 @@ object Example extends App {
     
     // Run the test query and print the results:
     println("\nSelecting all messages:")
-    val msgs = exec( messages.result )
-    println(msgs.foreach { println } )
+    println(exec( messages.result ).foreach { println } )
     
     println("\nSelecting only messages from HAL:")
-    val halsSaying = exec(halSays.result)
-    println(halsSaying.foreach { println } )    
-
-  } finally db.close
-  
- 
+    println(exec(halSays.result).foreach { println } )    
+  } 
 }
