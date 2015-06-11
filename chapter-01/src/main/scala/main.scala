@@ -55,9 +55,9 @@ object Example  {
     
     // Run the test query and print the results:
     println("\nSelecting all messages:")
-    println(exec( messages.result ).foreach { println } )
+    exec( messages.result ) foreach { println } 
     
     println("\nSelecting only messages from HAL:")
-    println(exec(halSays.result).foreach { println } )    
+    exec( halSays.result ) foreach { println }     
   } 
 }
