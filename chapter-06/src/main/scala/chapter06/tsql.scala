@@ -29,22 +29,27 @@ object TsqlExample extends App {
     def * = (content, id) <> (Message.tupled, Message.unapply)
   }
 
-  lazy val messages = TableQuery[MessageTable]
+  val messages = TableQuery[MessageTable]
 
-  // Compile-time type checked query:
+  //
+  // Compile-time type checked query example
+  //
+  // See what happens if you change the `String` to a different type;
+  // or select the `id` column rather than `content`.
   val query: DBIO[Seq[String]] =
     tsql""" select "content" from "message" """
-
 
   // Execute the query:
   val prog = for {
     _   <- messages.schema.create
     _   <- messages ++= testData
     msg <- query
-} yield msg
+  } yield msg
 
   val db = Database.forConfig("chapter06")
+  println("Content is:")
   val future = db.run(prog).map { _ foreach println }
   Await.result(future, 2 seconds)
+
   db.close
 }
