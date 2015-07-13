@@ -25,5 +25,7 @@ libraryDependencies ++= Seq(
 initialCommands in console := """
   |import slick.driver.H2Driver.api._
   |import Example._
+  |import scala.concurrent.duration._
+  |import scala.concurrent.Await
   |Example.main(Array())
 """.trim.stripMargin
