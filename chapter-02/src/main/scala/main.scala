@@ -1,11 +1,15 @@
 // Import the Slick interface for H2:
-import scala.slick.driver.H2Driver.simple._
+import slick.driver.H2Driver.api._
 
-object Example extends App {
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
+object Example  {
 
   // Case class representing a row in our table:
   final case class Message(
-    sender: String,
+    sender:  String,
     content: String,
     id: Long = 0L)
 
@@ -15,7 +19,8 @@ object Example extends App {
     Message("HAL",  "Affirmative, Dave. I read you."),
     Message("Dave", "Open the pod bay doors, HAL."),
     Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."),
-    Message("Dave", "What if I say 'Pretty please'?")
+    Message("Dave", "What if I say 'Pretty please'?"),
+    Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that.")
   )
 
   // Schema for the "message" table:
@@ -26,8 +31,7 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
 
-    def * = (sender, content, id) <>
-      (Message.tupled, Message.unapply)
+    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
   }
 
   // Base query for querying the messages table:
@@ -36,31 +40,33 @@ object Example extends App {
   // An example query that selects a subset of messages:
   val halSays = messages.filter(_.sender === "HAL")
 
-  // Create a permanent in-memory H2 database;
-  def db = Database.forURL(
-    url    = "jdbc:h2:mem:chat-database;DB_CLOSE_DELAY=-1",
-    driver = "org.h2.Driver")
+  // Create an in-memory H2 database;
+  val db = Database.forConfig("chapter02")
 
-  // Connect to the database...
-  db.withSession { implicit session =>
+  // Helper method for running a query in this example file
+  def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2.seconds)
+
+  def main(args:Array[String]) = {
     // Create the "messages" table:
     println("Creating database table")
-    messages.ddl.create
+    exec(messages.schema.create)
 
     // Create and insert the test data:
     println("\nInserting test data")
-    messages ++= freshTestData
+    exec(messages ++= freshTestData)
 
     // Run the test query and print the results:
-    println("\nSelecting all message sender names")
-    messages.map(_.sender).run.foreach(println)
+    println("\nSelecting all message sender names:")
+    exec( messages.map(_.sender).result ) foreach { println }
 
     println("\nSelecting only Pretty messages:")
     println(
-      messages.
-      map(_.content).
-      filter(_ like "%Pretty%").
-      run
-   )
-}
+      exec {
+        messages.
+        map(_.content).
+        filter(_ like "%Pretty%").
+        result
+      }
+    )
+  }
 }
