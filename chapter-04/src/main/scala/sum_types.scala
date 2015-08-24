@@ -8,7 +8,6 @@ import scala.concurrent.duration._
 import slick.lifted.MappedTo
 import slick.lifted.ProvenShape.proveShapeOf
 
-
 object SumTypesExample extends App {
 
   trait Profile {

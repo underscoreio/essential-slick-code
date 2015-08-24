@@ -48,6 +48,8 @@ object NullExample extends App {
     folks  <- users.result
   } yield folks
   
+  
+  
   exec(program).foreach { println }
 
 }
