@@ -1,11 +1,24 @@
-package chapter04
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
+import slick.driver.H2Driver.api._
+import slick.collection.heterogeneous.{ HList, HCons, HNil, Nat }
+import slick.collection.heterogeneous.syntax._
 
 object HListExampleApp extends App {
 
-  import scala.slick.driver.H2Driver.simple._
-  import scala.slick.collection.heterogenous.{ HList, HCons, HNil, Nat }
-  import scala.slick.collection.heterogenous.syntax._
 
+  trait Profile {
+    val profile:JdbcProfile
+  }
+
+  trait Tables {
+    this: Profile =>
+
+    import profile.api._
+  
+  
   type User =  String :: Int :: Char :: Float :: Float :: Int :: String :: String :: Boolean :: Boolean :: String :: String ::
   String :: String :: String :: String :: String :: String :: String :: String :: Int :: Boolean :: String :: String  :: Long :: HNil
 
@@ -53,25 +66,36 @@ object HListExampleApp extends App {
   }
 
   lazy val users = TableQuery[UserTable]
+  
+  }
+  
+  class Schema(val profile: JdbcProfile) extends Tables with Profile
 
+  val schema = new Schema(slick.driver.H2Driver)
+
+  import schema._, profile.api._
+
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)  
+  
   // Database connection details:
-  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
+  def db = Database.forConfig("chapter04")
 
-  db.withSession {
-    implicit session ⇒
-
-      users.ddl.create
-
-      users +=
+  
+  val program = for {
+    _ <- users.schema.create
+    _ <- users +=
           "Dr. Dave Bowman" :: 43 :: 'M' :: 1.7f :: 74.2f :: 11 :: "dave@example.org" :: "+1555740122" :: true :: true ::
             "123 Some Street" :: "Any Town" :: "USA" ::
             "Black" :: "Ice Cream" :: "Coffee" :: "Sky at Night" :: "Silent Running" :: "Bicycle made for Two" ::
             "Acme Space Helmet" :: 10 :: true ::
-            "HAL" :: "Betty" :: 0L :: HNil
+            "HAL" :: "Betty" :: 0L :: HNil   
+    folks  <- users.result
+  } yield folks
+  
+  exec(program).foreach { println }
 
-
-      println(
-        users.list
-       )
-    }
+  
+    
+ 
 }

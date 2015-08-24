@@ -1,8 +1,19 @@
-package chapter04
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
+import slick.lifted.ProvenShape.proveShapeOf
 
 object NestedCaseClassExampleApp extends App {
 
-  import scala.slick.driver.H2Driver.simple._
+  trait Profile {
+    val profile:JdbcProfile
+  }
+
+  trait Tables {
+    this: Profile =>
+
+    import profile.api._
 
   case class EmailContact(name: String, email: String)
   case class Address(street: String, city: String, country: String)
@@ -49,19 +60,27 @@ object NestedCaseClassExampleApp extends App {
 
   lazy val users = TableQuery[UserTable]
 
-  // Database connection details:
-  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
-
-  db.withSession {
-    implicit session =>
-
-      users.ddl.create
-
-      users += User(
-        EmailContact("Dr. Dave Bowman", "dave@example.org"),
-        Address("123 Some Street", "Any Town", "USA")
-      )
-
-      println(users.map(_.faveColor).run)
   }
+  class Schema(val profile: JdbcProfile) extends Tables with Profile
+
+  val schema = new Schema(slick.driver.H2Driver)
+
+  import schema._, profile.api._
+
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)     
+  
+  // Database connection details:
+  def db = Database.forConfig("chapter04")
+
+  val program = for {
+    _ <- users.schema.create
+    i <- users += User(
+      EmailContact("Dr. Dave Bowman", "dave@example.org"),
+      Address("123 Some Street", "Any Town", "USA"))
+    xs <- users.result
+  } yield xs 
+
+  exec(program).foreach { println }
+
 }

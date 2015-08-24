@@ -1,17 +1,22 @@
-package chapter04
-
 import java.sql.Timestamp
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.dbio._
+import slick.driver.JdbcProfile
+import slick.lifted.MappedTo
+import slick.lifted.ProvenShape.proveShapeOf
 
 object ValueClassesExample extends App {
 
   trait Profile {
-    val profile: scala.slick.driver.JdbcProfile
+    val profile:  JdbcProfile
   }
 
   object PKs {
-    import scala.slick.lifted.MappedTo
+    import slick.lifted.MappedTo
     case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
     case class UserPK(value: Long) extends AnyVal with MappedTo[Long]
   }
@@ -19,7 +24,7 @@ object ValueClassesExample extends App {
   trait Tables {
     this: Profile =>
 
-    import profile.simple._
+    import profile.api._
     import PKs._
 
     implicit val jodaDateTimeType =
@@ -57,37 +62,40 @@ object ValueClassesExample extends App {
     }
 
     lazy val messages = TableQuery[MessageTable]
+    
+    lazy val ddl = users.schema ++ messages.schema
+    
   }
 
 
-  class Schema(val profile: scala.slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: slick.driver.JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(scala.slick.driver.H2Driver)
+  val schema = new Schema(slick.driver.H2Driver)
 
-  import schema._, profile.simple._
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)    
+  
+  import schema._, profile.api._
   import PKs._
 
-  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
+  def db = Database.forConfig("chapter04")
 
-  db.withSession {
-    implicit session =>
-
-      (messages.ddl ++ users.ddl).create
-
-      // Users:
-      val halId  = insertUser += User("HAL")
-      val daveId = insertUser += User("Dave")
-
-      // Insert the conversation, which took place in Feb, 2001:
-      val start = new DateTime(2001, 2, 17, 10, 22, 50)
-
-      messages ++= Seq(
-        Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
-        Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
-        Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
-        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
-
-       // Won't compile:
-       // users.filter(_.id === 6L).run
-  }
+  // Insert the conversation, which took place in Feb, 2001:
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)  
+  
+  val program = 
+    for {
+    _      <- ddl.create
+    halId  <- insertUser += User("HAL")
+    daveId <- insertUser += User("Dave")
+    count  <- messages ++= Seq(
+               Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
+               Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
+               Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
+               Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
+  } yield count
+      
+  // Won't compile:
+  // users.filter(_.id === 6L)
+  exec(program).foreach { count => println(s"message count: $count") }
 }

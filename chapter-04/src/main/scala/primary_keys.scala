@@ -1,15 +1,23 @@
-package chapter04
+
+
+
+import org.joda.time.DateTime
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
+import slick.lifted.ProvenShape.proveShapeOf
 
 object PKExample extends App {
 
   trait Profile {
-    val profile: scala.slick.driver.JdbcProfile
+    val profile:JdbcProfile
   }
 
   trait Tables {
     this: Profile =>
 
-    import profile.simple._
+    import profile.api._
 
     case class User(id: Option[Long], name: String, email: Option[String] = None)
 
@@ -47,35 +55,35 @@ object PKExample extends App {
     }
 
     lazy val occupants = TableQuery[OccupantTable]
+
+    lazy val ddl = users.schema ++ rooms.schema ++ occupants.schema
   }
 
-  class Schema(val profile: scala.slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(scala.slick.driver.H2Driver)
+  val schema = new Schema(slick.driver.H2Driver)
 
-  import schema._, profile.simple._
+  import schema._, profile.api._
 
-  def db = Database.forURL("jdbc:h2:mem:chapter04", driver = "org.h2.Driver")
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)   
+  
+  def db = Database.forConfig("chapter04")
 
-  db.withSession {
-    implicit session =>
+  // Insert the conversation, which took place in Feb, 2001:
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)
 
-      (users.ddl ++ rooms.ddl ++ occupants.ddl).create
+  val init = for {
+    _         <- ddl.create
+    daveId    <- insertUser += User(None, "Dave", Some("dave@example.org"))
+    halId     <- insertUser += User(None, "HAL")
+    elena     <- insertUser += User(None, "Elena", Some("elena@example.org"))
+    airLockId <- insertRoom += Room("Air Lock")
+    _         <- occupants += Occupant(airLockId, daveId)
+  } yield ()
 
-      // A few users:
-      val daveId: Long = insertUser += User(None, "Dave", Some("dave@example.org"))
-      val halId:  Long = insertUser += User(None, "HAL")
-      val elena:  Long = insertUser += User(None, "Elena", Some("elena@example.org"))
-
-      println( users.list )
-
-      // A room:
-      val airLockId: Long = insertRoom += Room("Air Lock")
-
-      // Put Dave in the Room:
-      occupants += Occupant(airLockId, daveId)
-
-      println(occupants.list)
-  }
+  exec(init)
+  exec(users.result).foreach { println}
+  exec(occupants.result).foreach { println}
 
 }
