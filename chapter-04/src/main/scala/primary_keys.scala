@@ -82,5 +82,5 @@ object PKExample extends App {
   exec(init)
   exec(users.result).foreach { println}
   exec(occupants.result).foreach { println}
-
+    
 }

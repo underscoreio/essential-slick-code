@@ -96,5 +96,6 @@ object ForeignKeyExample extends App {
   
   exec(initalise)
   
-  println(s"Result of join: ${exec(q.result)}" )
+  println(s"Result of join  : ${exec(q.result)}" )
+  println(s"Result of delete: ${exec(delete)}" )
 }

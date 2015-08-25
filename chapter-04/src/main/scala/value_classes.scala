@@ -96,6 +96,14 @@ object ValueClassesExample extends App {
   } yield count
       
   // Won't compile:
-  // users.filter(_.id === 6L)
+  //users.filter(_.id === 6L)
+  //val halId = UserPK(3L)
+  //val rubbish = for {
+  //  id      <- messages.filter(_.senderId === halId).map(_.id)
+  //  rubbish <- messages.filter(_.senderId === id)
+  //} yield rubbish
+  
+  
+  
   exec(program).foreach { count => println(s"message count: $count") }
 }

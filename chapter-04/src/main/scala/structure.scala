@@ -72,5 +72,7 @@ object StructureExample extends App {
   val result =  Await.result(db.run(program), 2 seconds)
  
   println(s"Number of senders $result")
+ 
+  
   
 }
