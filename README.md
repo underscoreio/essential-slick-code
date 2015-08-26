@@ -9,7 +9,7 @@ _Essential Slick_ provides a compact, no-nonsense guide to everything you need t
 *    Chapter 3 covers queries for inserting, updating, and deleting data.
 *    Chapter 4 discusses data modelling, including defining custom column and table types.
 *    Chapter 5 explores advanced select queries, including joins and aggregates.
-*    Chapter 6 provides a brief overview of Plain SQL queries—a useful tool when you need fine control over the SQL sent to your database.
+*    Chapter 6 provides a brief overview of Plain SQL queries. This is a useful tool when you need fine control over the SQL sent to your database.
 
 To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/training/courses/essential-slick/).
 
@@ -93,8 +93,9 @@ _joins.scala_ contains much that is commented out.  Remove the comments from aro
 
 ### Chapter 6 (Plain SQL)
 
-This project contains two main examples:
+This project contains the following examples:
 
-1. `chapter05.PlainSelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
-2. `chapter05.PlainUpdatesExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.
+1. `chapter06.SelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
+2. `chapter06.UpdateExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.
+3. `chapter06.TsqlExample` in _tsql.scala_ - examples using typed plain queries.
 

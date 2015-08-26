@@ -1,24 +1,26 @@
 package chapter06
 
+import slick.driver.{JdbcProfile, JdbcDriver}
+import slick.lifted.MappedTo
+
 import java.sql.Timestamp
-import scala.slick.driver.JdbcDriver
-import scala.slick.lifted.MappedTo
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ChatSchema {
 
   case class Id[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
-    val profile: scala.slick.driver.JdbcProfile
+    val profile: slick.driver.JdbcProfile
   }
 
   trait Tables {
     this: Profile =>
 
-    import profile.simple._
-
+    import profile.api._
 
     case class User(id: Id[UserTable] = Id(0),name: String, email: Option[String] = None)
 
@@ -79,34 +81,33 @@ object ChatSchema {
       def * = (senderId, content, ts, roomId, toId, id) <> (Message.tupled, Message.unapply)
 
       def sender = foreignKey("msg_sender_fk", senderId, users)(_.id)
-      def to     = foreignKey("msg_to_fk", toId, users)(_.id)
-      def room   = foreignKey("msg_room_fk", roomId, rooms)(_.id)
+      def to     = foreignKey("msg_to_fk", toId, users)(_.id.?)
+      def room   = foreignKey("msg_room_fk", roomId, rooms)(_.id.?)
     }
 
     lazy val messages = TableQuery[MessageTable]
 
+    def schema =
+      (users.schema ++ rooms.schema ++ occupants.schema ++ messages.schema)
+
     // Sample data set
-    def populate(implicit session: Session): Unit = {
+    def populate = for {
 
-      // Print the schema:
-      // (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
-
-      // Execute the schema:
-      (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
+      _                      <- schema.create
 
       // A few users:
-      val daveId:  Id[UserTable] = insertUser += User(name = "Dave", email = Some("dave@example.org"))
-      val halId:   Id[UserTable] = insertUser += User(name = "HAL")
-      val elenaId: Id[UserTable] = insertUser += User(name = "Elena",email = Some("elena@example.org"))
-      val frankId: Id[UserTable] = insertUser += User(name = "Frank",email = Some("frank@example.org"))
+      daveId:  Id[UserTable] <- insertUser += User(name = "Dave", email = Some("dave@example.org"))
+      halId:   Id[UserTable] <- insertUser += User(name = "HAL")
+      elenaId: Id[UserTable] <- insertUser += User(name = "Elena",email = Some("elena@example.org"))
+      frankId: Id[UserTable] <- insertUser += User(name = "Frank",email = Some("frank@example.org"))
 
       // rooms:
-      val airLockId: Id[RoomTable] = insertRoom += Room("Air Lock")
-      val podId:     Id[RoomTable] = insertRoom += Room("Pod")
-      val brainId:   Id[RoomTable] = insertRoom += Room("Brain Room")
+      airLockId: Id[RoomTable] <- insertRoom += Room("Air Lock")
+      podId:     Id[RoomTable] <- insertRoom += Room("Pod")
+      brainId:   Id[RoomTable] <- insertRoom += Room("Brain Room")
 
-      // Put Dave in the Room:
-      occupants ++= List(
+      // Put people in the rooms:
+      _  <- occupants ++= List(
         Occupant(airLockId, daveId),
         Occupant(airLockId, halId),
         Occupant(podId, daveId),
@@ -114,10 +115,10 @@ object ChatSchema {
         Occupant(podId, halId) )
 
       // Insert the conversation, which took place in Feb, 2001:
-      val airLockConversation = new DateTime(2001, 2, 17, 10, 22, 50)
+      airLockConversation = new DateTime(2001, 2, 17, 10, 22, 50)
 
       // Add some messages to the air lock room:
-      messages ++= Seq(
+      _ <- messages ++= Seq(
         Message(daveId, "Hello, HAL. Do you read me, HAL?",             airLockConversation,               Some(airLockId)),
         Message(halId,  "Affirmative, Dave. I read you.",               airLockConversation plusSeconds 2, Some(airLockId)),
         Message(daveId, "Open the pod bay doors, HAL.",                 airLockConversation plusSeconds 4, Some(airLockId)),
@@ -125,19 +126,21 @@ object ChatSchema {
 
 
       // A few messages in the Pod:
-      val podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
+      podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
 
-      messages ++= Seq(
+      _ <- messages ++= Seq(
         Message(frankId, "Well, whaddya think?", podConversation, Some(podId)),
         Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, Some(podId)))
 
       // And private (direct messages)
-      messages ++= Seq(
+      _ <- messages ++= Seq(
         Message(frankId, "Are you thinking what I'm thinking?", podConversation plusSeconds 6, Some(podId), toId=Some(daveId)),
         Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
-    }
+
+    } yield ()
+
   }
 
-  class Schema(val profile: scala.slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: JdbcProfile) extends Tables with Profile
   case class DB(driver: JdbcDriver, url: String, clazz: String)
 }
