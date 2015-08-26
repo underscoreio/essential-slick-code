@@ -13,7 +13,9 @@ _Essential Slick_ provides a compact, no-nonsense guide to everything you need t
 
 To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/training/courses/essential-slick/).
 
-This first edition is for Slick 2.1
+This is the early edition is for Slick 3. Chapters 1, 2, and 6 are available.
+
+  _If you're looking for the example code for Slick 2.1, use the [2.1 branch](https://github.com/underscoreio/essential-slick-code/tree/2.1)_.
 
 ## About the Code
 
