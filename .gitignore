@@ -4,3 +4,4 @@ target
 *.db
 .settings
 
+.cache-main

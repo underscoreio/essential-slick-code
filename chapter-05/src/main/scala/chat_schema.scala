@@ -1,9 +1,12 @@
-package chapter05
-
 import java.sql.Timestamp
 
-import scala.slick.driver.JdbcDriver
-import scala.slick.lifted.MappedTo
+import slick.driver.JdbcDriver
+import slick.lifted.MappedTo
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone._
@@ -13,13 +16,13 @@ object ChatSchema {
   case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
-    val profile: scala.slick.driver.JdbcProfile
+    val profile: slick.driver.JdbcProfile
   }
 
   trait Tables {
     this: Profile =>
 
-    import profile.simple._
+    import profile.api._
 
     case class User(name: String, email: Option[String] = None, id: PK[UserTable] = PK(0))
 
@@ -80,65 +83,55 @@ object ChatSchema {
       def * = (senderId, content, ts, roomId, toId, id) <> (Message.tupled, Message.unapply)
 
       def sender = foreignKey("msg_sender_fk", senderId, users)(_.id)
-      def to     = foreignKey("msg_to_fk", toId, users)(_.id)
-      def room   = foreignKey("msg_room_fk", roomId, rooms)(_.id)
+      def to     = foreignKey("msg_to_fk", toId, users)(_.id.?)
+      def room   = foreignKey("msg_room_fk", roomId, rooms)(_.id.?)
     }
 
     lazy val messages = TableQuery[MessageTable]
 
+    lazy val ddl = users.schema ++ rooms.schema ++ occupants.schema ++ messages.schema
+
     // Sample data set
-    def populate(implicit session: Session): Unit = {
-
-      // Print the schema:
-      (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).createStatements.foreach(println)
-
-      // Execute the schema:
-      (users.ddl ++ rooms.ddl ++ occupants.ddl ++ messages.ddl).create
-
-      // A few users:
-      val daveId:  PK[UserTable] = insertUser += User("Dave", Some("dave@example.org"))
-      val halId:   PK[UserTable] = insertUser += User("HAL")
-      val elenaId: PK[UserTable] = insertUser += User("Elena", Some("elena@example.org"))
-      val frankId: PK[UserTable] = insertUser += User("Frank", Some("frank@example.org"))
-
-      // rooms:
-      val airLockId: PK[RoomTable] = insertRoom += Room("Air Lock")
-      val podId:     PK[RoomTable] = insertRoom += Room("Pod")
-      val brainId:   PK[RoomTable] = insertRoom += Room("Brain Room")
-
-      // Put Dave in the Room:
-      occupants ++= List(
-        Occupant(airLockId, daveId),
-        Occupant(airLockId, halId),
-        Occupant(podId, daveId),
-        Occupant(podId, frankId),
-        Occupant(podId, halId) )
+    def populate = {
 
       // Insert the conversation, which took place in Feb, 2001:
       val airLockConversation = new DateTime(2001, 2, 17, 10, 22, 50)
-
-      // Add some messages to the air lock room:
-      messages ++= Seq(
-        Message(daveId, "Hello, HAL. Do you read me, HAL?",             airLockConversation,               Some(airLockId)),
-        Message(halId,  "Affirmative, Dave. I read you.",               airLockConversation plusSeconds 2, Some(airLockId)),
-        Message(daveId, "Open the pod bay doors, HAL.",                 airLockConversation plusSeconds 4, Some(airLockId)),
-        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", airLockConversation plusSeconds 6, Some(airLockId)))
-
-
       // A few messages in the Pod:
       val podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
+      
+      val program = for {
+        _         <- ddl.create
+        daveId    <- insertUser += User("Dave", Some("dave@example.org"))
+        halId     <- insertUser += User("HAL")
+        elenaId   <- insertUser += User("Elena", Some("elena@example.org"))
+        frankId   <- insertUser += User("Frank", Some("frank@example.org"))
+        airLockId <- insertRoom += Room("Air Lock")
+        podId     <- insertRoom += Room("Pod")
+        brainId   <- insertRoom += Room("Brain Room")
+        a         <- occupants ++= List(
+                       Occupant(airLockId, daveId),
+                       Occupant(airLockId, halId),
+                       Occupant(podId, daveId),
+                       Occupant(podId, frankId),
+                       Occupant(podId, halId) )
+        b         <- messages ++= Seq(
+                       Message(daveId, "Hello, HAL. Do you read me, HAL?",             airLockConversation,               Some(airLockId)),
+                       Message(halId,  "Affirmative, Dave. I read you.",               airLockConversation plusSeconds 2, Some(airLockId)),
+                       Message(daveId, "Open the pod bay doors, HAL.",                 airLockConversation plusSeconds 4, Some(airLockId)),
+                       Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", airLockConversation plusSeconds 6, Some(airLockId)))
+        c         <- messages ++= Seq(
+                       Message(frankId, "Well, whaddya think?", podConversation, Some(podId)),
+                       Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, Some(podId)))
+        d         <- messages ++= Seq(
+                       Message(frankId, "Are you thinking what I'm thinking?", podConversation plusSeconds 6, Some(podId), toId=Some(daveId)),
+                       Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
+      } yield (a,b,c,d)
+      
+      program
 
-      messages ++= Seq(
-        Message(frankId, "Well, whaddya think?", podConversation, Some(podId)),
-        Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, Some(podId)))
-
-      // And private (direct messages)
-      messages ++= Seq(
-        Message(frankId, "Are you thinking what I'm thinking?", podConversation plusSeconds 6, Some(podId), toId=Some(daveId)),
-        Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
     }
   }
 
-  class Schema(val profile: scala.slick.driver.JdbcProfile) extends Tables with Profile
+  case class Schema(val profile: JdbcProfile) extends Tables with Profile
   case class DB(driver: JdbcDriver, url: String, clazz: String)
 }
