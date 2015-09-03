@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.H2Driver.api._
 import slick.lifted.ProvenShape.proveShapeOf
 
-
 object Example extends App {
 
   // Row representation:
@@ -26,7 +25,7 @@ object Example extends App {
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T =
-    Await.result(db.run(program), 500 milliseconds)
+    Await.result(db.run(program), 5000 milliseconds)
 
   def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  for {
     //Create the table:
@@ -39,14 +38,17 @@ object Example extends App {
       Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."))
   } yield count
 
-
   try {
     exec(populate)
 
+    // -- INSERTS --
+
     // Insert one, returning the ID:
     val id = exec((messages returning messages.map(_.id)) += Message("HAL", "I'm back"))
-
     println(s"The ID inserted was: $id")
+
+
+    // -- UPDATES --
 
     // Update HAL's name:
     val rows = exec(messages.filter(_.sender === "HAL").map(_.sender).update("HAL 9000"))
@@ -59,37 +61,42 @@ object Example extends App {
 
     val rowsAffected  = exec(query.update(("HAL 9000", "Sure, Dave. Come right in.")))
 
-    messages.
-      filter(_.id === 4L).
-      map(message => (message.sender, message.content)).
-      updateStatement
-
-    exec(
+    // Action for updating multiple fields:
+    exec {
       messages.
         filter(_.id === 4L).
         map(message => (message.sender, message.content)).
-        update(("HAL 9000", "Sure, Dave. Come right in.")))
+        update(("HAL 9000", "Sure, Dave. Come right in."))
+      }
 
+    // Client-side update:
+    def exclaim(msg: Message): Message = msg.copy(content = msg.content + "!")
+
+    val all: DBIO[Seq[Message]] = messages.result
+    def modify(msg: Message): DBIO[Int] = messages.filter(_.id === msg.id).update(exclaim(msg))
+    val action: DBIO[Seq[Int]] = all.flatMap( msgs => DBIO.sequence(msgs.map(modify)) )
+    val rowCounts: Seq[Int] = exec(action)
+
+
+    def currentState() = {
+      println("\nState of the database:")
+      exec(messages.result.map(_.foreach(println)))
+    }
+
+    currentState
+
+    // TODO: Why do we need this?   Maybe for exercises...
     exec(messages returning messages.map(_.id) += Message("Dave", "Point taken." ))
+
+
     // Delete messages from HAL:
     // NB: will be zero rows affected because we've renamed HAL to HALL 9000
     exec(messages.filter(_.sender === "HAL").delete)
 
-    def exclaim(msg: Message): Message = msg.copy(content = msg.content + "!")
 
-    for {
-      msg <- exec(messages.result)
-    } yield exec(messages.filter(_.id === msg.id).update(exclaim(msg)))
 
     def updateContent(id: Long) =
       messages.filter(_.id === id).map(_.content)
-
-    def currentState() = {
-         println("\nState of the database:")
-         exec(messages.result.map(_.foreach(println)))
-    }
-
-    currentState
 
     try {
       exec {
