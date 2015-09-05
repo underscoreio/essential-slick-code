@@ -78,6 +78,19 @@ object Example extends App {
     val rowCounts: Seq[Int] = exec(action)
 
 
+    // Action Combinators
+
+    // http://rosettacode.org/wiki/Rot-13#Scala
+    def rot13(s: String) = s map {
+      case c if 'a' <= c.toLower && c.toLower <= 'm' => c + 13 toChar
+      case c if 'n' <= c.toLower && c.toLower <= 'z' => c - 13 toChar
+      case c => c
+    }
+
+    val clear: DBIO[String] = messages.map(_.content).result.head
+    val encrypted: DBIO[String] = clear.map(rot13)
+    println(exec(encrypted))
+
     def currentState() = {
       println("\nState of the database:")
       exec(messages.result.map(_.foreach(println)))
