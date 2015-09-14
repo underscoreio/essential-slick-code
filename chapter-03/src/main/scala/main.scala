@@ -3,6 +3,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.H2Driver.api._
 import slick.lifted.ProvenShape.proveShapeOf
+import scala.util.Try
 
 object Example extends App {
 
@@ -77,8 +78,11 @@ object Example extends App {
     val action: DBIO[Seq[Int]] = all.flatMap( msgs => DBIO.sequence(msgs.map(modify)) )
     val rowCounts: Seq[Int] = exec(action)
 
-
+    //
     // Action Combinators
+    //
+
+    // Map:
 
     // http://rosettacode.org/wiki/Rot-13#Scala
     def rot13(s: String) = s map {
@@ -87,9 +91,19 @@ object Example extends App {
       case c => c
     }
 
-    val clear: DBIO[String] = messages.map(_.content).result.head
-    val encrypted: DBIO[String] = clear.map(rot13)
+    val text: DBIO[String] = messages.map(_.content).result.head
+    val encrypted: DBIO[String] = text.map(rot13) // obviously very weak "encryption"
+
+    println("An 'encrypted' message from the database:")
     println(exec(encrypted))
+
+    // Filter and asTry:
+
+    println("\nFiltering for a 'long message':")
+    val longMsgAction: DBIO[Try[String]] = text.filter(s => s.length > 100).asTry
+    println(exec(longMsgAction))
+
+
 
     def currentState() = {
       println("\nState of the database:")
