@@ -16,10 +16,18 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
     def * = (sender, content, id) <> (Message.tupled, Message.unapply)
+
+    def forInsert = (sender) <>[Message,(String)] (
+      { case (s) => Message(s, "BOOM") },
+      { msg => Some((msg.sender)) } )
   }
 
   // Table:
   lazy val messages = TableQuery[MessageTable]
+
+  lazy val updater = messages.map(_.forInsert)
+
+
 
   // Database connection details:
   def db = Database.forConfig("chapter03")
@@ -27,6 +35,7 @@ object Example extends App {
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T =
     Await.result(db.run(program), 5000 milliseconds)
+
 
   def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  for {
     //Create the table:
@@ -47,6 +56,16 @@ object Example extends App {
     // Insert one, returning the ID:
     val id = exec((messages returning messages.map(_.id)) += Message("HAL", "I'm back"))
     println(s"The ID inserted was: $id")
+
+
+    // -- DELETES --
+
+    // Delete messages from HAL:
+    // NB: will be zero rows affected because we've renamed HAL to HALL 9000
+    println("\nDeleting messages from HAL:")
+    val rowsDeleted = exec(messages.filter(_.sender === "HAL").delete)
+    println(s"Rows deleted: $rowsDeleted")
+
 
 
     // -- UPDATES --
@@ -94,7 +113,7 @@ object Example extends App {
     val text: DBIO[String] = messages.map(_.content).result.head
     val encrypted: DBIO[String] = text.map(rot13) // obviously very weak "encryption"
 
-    println("An 'encrypted' message from the database:")
+    println("\nAn 'encrypted' message from the database:")
     println(exec(encrypted))
 
     // Filter and asTry:
@@ -103,6 +122,18 @@ object Example extends App {
     val longMsgAction: DBIO[Try[String]] = text.filter(s => s.length > 100).asTry
     println(exec(longMsgAction))
 
+
+    // FlatMap:
+    val delete: DBIO[Int] = messages.delete
+    def insert(count: Int) = messages += Message("NOBODY", s"I removed ${count} messages")
+
+    val resetMessagesAction: DBIO[Int] = delete.flatMap{ count => insert(count) }
+
+    val resetMessagesAction2: DBIO[Int] =
+      delete.flatMap{
+        case 0 | 1 => DBIO.successful(0)
+        case n     => insert(n)
+      }
 
 
     def currentState() = {
@@ -114,11 +145,6 @@ object Example extends App {
 
     // TODO: Why do we need this?   Maybe for exercises...
     exec(messages returning messages.map(_.id) += Message("Dave", "Point taken." ))
-
-
-    // Delete messages from HAL:
-    // NB: will be zero rows affected because we've renamed HAL to HALL 9000
-    exec(messages.filter(_.sender === "HAL").delete)
 
 
 
