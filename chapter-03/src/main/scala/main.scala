@@ -22,7 +22,7 @@ object Example extends App {
   lazy val messages = TableQuery[MessageTable]
 
   // Database connection details:
-  def db = Database.forConfig("chapter03")
+  val db = Database.forConfig("chapter03")
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T =
@@ -63,24 +63,24 @@ object Example extends App {
       filter(_.id === 4L).
       map(message => (message.sender, message.content)).
       updateStatement
-    
+
     exec(
       messages.
         filter(_.id === 4L).
         map(message => (message.sender, message.content)).
-        update(("HAL 9000", "Sure, Dave. Come right in.")))    
-    
+        update(("HAL 9000", "Sure, Dave. Come right in.")))
+
     exec(messages returning messages.map(_.id) += Message("Dave", "Point taken." ))
     // Delete messages from HAL:
     // NB: will be zero rows affected because we've renamed HAL to HALL 9000
     exec(messages.filter(_.sender === "HAL").delete)
 
-    def exclaim(msg: Message): Message = msg.copy(content = msg.content + "!")    
-    
+    def exclaim(msg: Message): Message = msg.copy(content = msg.content + "!")
+
     for {
       msg <- exec(messages.result)
     } yield exec(messages.filter(_.id === msg.id).update(exclaim(msg)))
-    
+
     def updateContent(id: Long) =
       messages.filter(_.id === id).map(_.content)
 
@@ -88,9 +88,9 @@ object Example extends App {
          println("\nState of the database:")
          exec(messages.result.map(_.foreach(println)))
     }
-    
+
     currentState
-     
+
     try {
       exec {
         (
@@ -101,27 +101,27 @@ object Example extends App {
         updateContent(4L).update("That's incredibly hurtful")
         ).transactionally
       }
-    
+
     } catch {
       case weKnow: Throwable => println("expected")
     }
-        
+
     currentState
   } finally db.close
 
   //Exercises
 
-  //Insert only once 
+  //Insert only once
   def insertOnce(sender: String, text: String): Long = ???
-  
+
   println(insertOnce("Dave","Have you changed the locks?") == insertOnce("Dave","Have you changed the locks?"))
-  
+
   //Update Using a For Comprehension
   val rowsAffected = messages.
                      filter(_.sender === "HAL").
                      map(msg => (msg.sender)).
-                     update("HAL 9000")  
-  
-  val rowsAffectedUsingForComprehension = ??? 
-  
+                     update("HAL 9000")
+
+  val rowsAffectedUsingForComprehension = ???
+
 }
