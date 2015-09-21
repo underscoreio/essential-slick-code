@@ -13,7 +13,7 @@ object JoinsExample extends App {
 
   def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
 
-  def db = Database.forConfig("chapter05")
+  val db = Database.forConfig("chapter05")
 
   exec(populate)
 
@@ -39,7 +39,7 @@ object JoinsExample extends App {
   // Further examples from the book appear below.
   // Remove the comments around what you need.
 
-  /*      
+  /*
   // Dave's messages example:
   val davesMessages = for {
     dId     <- daveId
@@ -57,12 +57,12 @@ object JoinsExample extends App {
 
   val davesMessagesWithFKs =  for {
     dId     <- daveId
-    rId     <- airLockId        
+    rId     <- airLockId
     message <- messages
     user    <- message.sender
     room    <- message.room
     if user.id === dId &&
-       room.id === rId 
+       room.id === rId
   } yield (message.content, user.name, room.title)
 
   exec(davesMessagesWithFKs.result).foreach(result => println(result))
@@ -135,7 +135,7 @@ object JoinsExample extends App {
       } yield room.map(_.title) -> msg.map(_.content)
 
       println(s"full ${outer.result.statements}")
-      
+
       exec(outer.result).foreach(println)
   */
 
@@ -152,7 +152,7 @@ object JoinsExample extends App {
   */
 
   //ZipWith
-  /*      
+  /*
       def combiner(fst: MessageTable, snd: MessageTable) = fst.content -> snd.content
       val query = msgs.zipWith(msgs.drop(1), combiner)
       exec(query.result).foreach(println)
@@ -165,7 +165,7 @@ object JoinsExample extends App {
       }.result).foreach(println)
   */
 
-  //Implicit cross join 
+  //Implicit cross join
   /*
       val query = messages joinLeft users
       exec(query.result).foreach(println)

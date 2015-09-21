@@ -11,7 +11,7 @@ object AggregatesExample extends App {
 
   val schema = new Schema(slick.driver.H2Driver)
   import schema._, profile.api._
-  def db = Database.forConfig("chapter05")
+  val db = Database.forConfig("chapter05")
   def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
 
   exec(populate)
@@ -67,9 +67,9 @@ object AggregatesExample extends App {
   val nicerStats =
     messages.join(users).on(_.senderId === _.id).
       groupBy { case (msg, user) => user.name }.
-      map { case (name, group) => 
+      map { case (name, group) =>
         (name, group.length, timestampOf(group).min) }
 
-  println(s"Nicer Stats: ${exec(nicerStats.result)}") 
-      
+  println(s"Nicer Stats: ${exec(nicerStats.result)}")
+
 }
