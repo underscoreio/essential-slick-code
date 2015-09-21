@@ -25,14 +25,14 @@ object ModifiersExample extends App {
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
 
-    case class User(name: String, 
-                    avatar: Option[Array[Byte]] = None, 
+    case class User(name: String,
+                    avatar: Option[Array[Byte]] = None,
                     id: Long = 0L)
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
       def id     = column[Long]("id", O.PrimaryKey, O.AutoInc)
-      def name   = column[String]("name", 
-                                  O.Length(64, true), 
+      def name   = column[String]("name",
+                                  O.Length(64, true),
                                   O.Default("Anonymous Coward"))
       def avatar = column[Option[Array[Byte]]]("avatar", O.SqlType("BINARY(2048)"))
 
@@ -62,11 +62,11 @@ object ModifiersExample extends App {
     }
 
     lazy val messages = TableQuery[MessageTable]
-    
-    lazy val ddl = users.schema ++ messages.schema    
+
+    lazy val ddl = users.schema ++ messages.schema
   }
-  
- 
+
+
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
   val schema = new Schema(slick.driver.H2Driver)
@@ -74,14 +74,14 @@ object ModifiersExample extends App {
   import schema._, profile.api._
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)  
-  
-  def db = Database.forConfig("chapter04")
+    Await.result(db.run(action), 2 seconds)
+
+  val db = Database.forConfig("chapter04")
 
   // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)  
-  
-  val initalise = 
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)
+
+  val initalise =
     for {
     _      <- ddl.create
     halId  <- insertUser += User("HAL")
@@ -100,9 +100,9 @@ object ModifiersExample extends App {
   } yield (usr.name, msg.content)
 
   val delete = users.filter(_.name === "HAL").delete
-  
+
   exec(initalise)
-  
+
   println(s"Result of join: ${exec(q.result)}" )
   // Example CASCADE DELETE:
   println(s"Rows deleted: ${exec(delete)}")

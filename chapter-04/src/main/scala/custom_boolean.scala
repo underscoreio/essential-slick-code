@@ -81,8 +81,8 @@ object CustomBooleanExample extends App {
     }
 
     lazy val messages = TableQuery[MessageTable]
-    
-    lazy val ddl = users.schema ++ messages.schema    
+
+    lazy val ddl = users.schema ++ messages.schema
   }
 
 
@@ -94,14 +94,14 @@ object CustomBooleanExample extends App {
   import PKs._
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)  
-  
-  def db = Database.forConfig("chapter04")
+    Await.result(db.run(action), 2 seconds)
+
+  val db = Database.forConfig("chapter04")
 
  // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)  
-  
-  val program = 
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)
+
+  val program =
     for {
     _      <- ddl.create
     halId  <- insertUser += User("HAL")

@@ -63,9 +63,9 @@ object PKExample extends App {
   import schema._, profile.api._
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)   
-  
-  def db = Database.forConfig("chapter04")
+    Await.result(db.run(action), 2 seconds)
+
+  val db = Database.forConfig("chapter04")
 
   // Insert the conversation, which took place in Feb, 2001:
   val start = new DateTime(2001, 2, 17, 10, 22, 50)
@@ -82,5 +82,5 @@ object PKExample extends App {
   exec(init)
   exec(users.result).foreach { println}
   exec(occupants.result).foreach { println}
-    
+
 }

@@ -34,11 +34,11 @@ object NullExample extends App {
   val schema = new Schema(slick.driver.H2Driver)
 
   import schema._, profile.api._
-  
-  def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)   
 
-  def db = Database.forConfig("chapter04")
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)
+
+  val db = Database.forConfig("chapter04")
 
   val program = for {
     _ <- users.schema.create
@@ -47,9 +47,9 @@ object NullExample extends App {
     elena  <- insertUser += User("Elena", Some("elena@example.org"))
     folks  <- users.result
   } yield folks
-  
-  
-  
+
+
+
   exec(program).foreach { println }
 
 }

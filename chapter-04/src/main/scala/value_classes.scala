@@ -62,9 +62,9 @@ object ValueClassesExample extends App {
     }
 
     lazy val messages = TableQuery[MessageTable]
-    
+
     lazy val ddl = users.schema ++ messages.schema
-    
+
   }
 
 
@@ -73,17 +73,17 @@ object ValueClassesExample extends App {
   val schema = new Schema(slick.driver.H2Driver)
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)    
-  
+    Await.result(db.run(action), 2 seconds)
+
   import schema._, profile.api._
   import PKs._
 
-  def db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter04")
 
   // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)  
-  
-  val program = 
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)
+
+  val program =
     for {
     _      <- ddl.create
     halId  <- insertUser += User("HAL")
@@ -94,7 +94,7 @@ object ValueClassesExample extends App {
                Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
                Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
   } yield count
-      
+
   // Won't compile:
   //users.filter(_.id === 6L)
   //val halId = UserPK(3L)
@@ -102,8 +102,8 @@ object ValueClassesExample extends App {
   //  id      <- messages.filter(_.senderId === halId).map(_.id)
   //  rubbish <- messages.filter(_.senderId === id)
   //} yield rubbish
-  
-  
-  
+
+
+
   exec(program).foreach { count => println(s"message count: $count") }
 }

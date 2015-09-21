@@ -83,7 +83,7 @@ object SumTypesExample extends App {
     }
 
     lazy val messages = TableQuery[MessageTable]
-    
+
     lazy val ddl = users.schema ++ messages.schema
   }
 
@@ -95,12 +95,12 @@ object SumTypesExample extends App {
   import schema._, profile.api._
   import PKs._
 
-  def db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter04")
 
   // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)  
-  
-  val program = 
+  val start = new DateTime(2001, 2, 17, 10, 22, 50)
+
+  val program =
     for {
     _      <- ddl.create
     halId  <- insertUser += User("HAL")
@@ -110,11 +110,11 @@ object SumTypesExample extends App {
                Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
                Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
                Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6, Some(Important)))
-    msgs   <- messages.filter(_.flag === (Important : Flag)).result                          
+    msgs   <- messages.filter(_.flag === (Important : Flag)).result
   } yield  msgs
 
   val result =  Await.result(db.run(program), 2 seconds)
- 
-  println(result)  
+
+  println(result)
 
 }

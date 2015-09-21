@@ -17,8 +17,8 @@ object HListExampleApp extends App {
     this: Profile =>
 
     import profile.api._
-  
-  
+
+
   type User =  String :: Int :: Char :: Float :: Float :: Int :: String :: String :: Boolean :: Boolean :: String :: String ::
   String :: String :: String :: String :: String :: String :: String :: String :: Int :: Boolean :: String :: String  :: Long :: HNil
 
@@ -66,9 +66,9 @@ object HListExampleApp extends App {
   }
 
   lazy val users = TableQuery[UserTable]
-  
+
   }
-  
+
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
   val schema = new Schema(slick.driver.H2Driver)
@@ -76,12 +76,12 @@ object HListExampleApp extends App {
   import schema._, profile.api._
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)  
-  
-  // Database connection details:
-  def db = Database.forConfig("chapter04")
+    Await.result(db.run(action), 2 seconds)
 
-  
+  // Database connection details:
+  val db = Database.forConfig("chapter04")
+
+
   val program = for {
     _ <- users.schema.create
     _ <- users +=
@@ -89,13 +89,13 @@ object HListExampleApp extends App {
             "123 Some Street" :: "Any Town" :: "USA" ::
             "Black" :: "Ice Cream" :: "Coffee" :: "Sky at Night" :: "Silent Running" :: "Bicycle made for Two" ::
             "Acme Space Helmet" :: 10 :: true ::
-            "HAL" :: "Betty" :: 0L :: HNil   
+            "HAL" :: "Betty" :: 0L :: HNil
     folks  <- users.result
   } yield folks
-  
+
   exec(program).foreach { println }
 
-  
-    
- 
+
+
+
 }

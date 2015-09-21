@@ -68,10 +68,10 @@ object NestedCaseClassExampleApp extends App {
   import schema._, profile.api._
 
   def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)     
-  
+    Await.result(db.run(action), 2 seconds)
+
   // Database connection details:
-  def db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter04")
 
   val program = for {
     _ <- users.schema.create
@@ -79,7 +79,7 @@ object NestedCaseClassExampleApp extends App {
       EmailContact("Dr. Dave Bowman", "dave@example.org"),
       Address("123 Some Street", "Any Town", "USA"))
     xs <- users.result
-  } yield xs 
+  } yield xs
 
   exec(program).foreach { println }
 
