@@ -18,7 +18,6 @@ scalacOptions ++= Seq(
 
 
 libraryDependencies ++= Seq(
-  "org.scala-lang"      % "scala-reflect"   % scalaVersion.value,
   "com.typesafe.slick" %% "slick"           % "3.0.0",
   "com.h2database"      % "h2"              % "1.4.185",
   "ch.qos.logback"      % "logback-classic" % "1.1.2",

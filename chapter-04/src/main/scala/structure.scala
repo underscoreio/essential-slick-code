@@ -8,40 +8,44 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
 
+
+trait Profile {
+  val profile  : JdbcProfile
+}
+
+trait Tables {
+  // Self-type indicating that our tables must be mixed in with a Profile
+  this: Profile =>
+
+  // Whatever that Profile is, we import it as normal:
+  import profile.api._
+
+  implicit val jodaDateTimeType =
+    MappedColumnType.base[DateTime, Timestamp](
+      dt => new Timestamp(dt.getMillis),
+      ts => new DateTime(ts.getTime, UTC)
+    )
+
+  // Row and table definitions here as normal
+  case class Message(sender: String, content: String, ts: DateTime, id: Long = 0L)
+
+  final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
+    def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def sender  = column[String]("sender")
+    def content = column[String]("content")
+    def ts      = column[DateTime]("ts")
+    def * = (sender, content, ts, id) <> (Message.tupled, Message.unapply)
+  }
+
+  object messages extends TableQuery( new MessageTable(_)) {
+    val findBySender = this.findBy(_.sender)
+    val numSenders   = this.map(_.sender).countDistinct
+  }
+  
+}
+
+
 object StructureExample extends App {
-
-  trait Profile {
-    val profile  : JdbcProfile
-  }
-
-  trait Tables {
-    // Self-type indicating that our tables must be mixed in with a Profile
-    this: Profile =>
-
-    // Whatever that Profile is, we import it as normal:
-    import profile.api._
-
-    implicit val jodaDateTimeType =
-      MappedColumnType.base[DateTime, Timestamp](
-        dt => new Timestamp(dt.getMillis),
-        ts => new DateTime(ts.getTime, UTC)
-      )
-
-    // Row and table definitions here as normal
-    case class Message(sender: String, content: String, ts: DateTime, id: Long = 0L)
-
-    final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-      def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
-      def sender  = column[String]("sender")
-      def content = column[String]("content")
-      def ts      = column[DateTime]("ts")
-      def * = (sender, content, ts, id) <> (Message.tupled, Message.unapply)
-    }
-
-    lazy val messages = TableQuery[MessageTable]
-
-    def numSenders = messages.map(_.sender).countDistinct
-  }
 
   // Bring all the components together:
   class Schema(val profile: JdbcProfile) extends Tables with Profile
@@ -66,7 +70,7 @@ object StructureExample extends App {
   val program = for {
     _ <- messages.schema.create
     _ <- messages ++= msgs
-    c <- numSenders.result
+    c <- messages.numSenders.result
     } yield c
 
   val result =  Await.result(db.run(program), 2 seconds)
