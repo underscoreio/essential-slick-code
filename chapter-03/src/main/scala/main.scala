@@ -16,17 +16,10 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
     def * = (sender, content, id) <> (Message.tupled, Message.unapply)
-
-    def forInsert = (sender) <>[Message,(String)] (
-      { case (s) => Message(s, "BOOM") },
-      { msg => Some((msg.sender)) } )
   }
 
   // Table:
   lazy val messages = TableQuery[MessageTable]
-
-  lazy val updater = messages.map(_.forInsert)
-
 
 
   // Database connection details:
@@ -135,6 +128,42 @@ object Example extends App {
         case n     => insert(n)
       }
 
+    //
+    // unfold
+    //
+
+    final case class Room(name: String, next: String)
+
+    final class FloorPlan(tag: Tag) extends Table[Room](tag, "floorplan") {
+      def name = column[String]("name")
+      def next = column[String]("next")
+      def * = (name, next) <> (Room.tupled, Room.unapply)
+    }
+
+    lazy val floorplan = TableQuery[FloorPlan]
+
+    exec {
+      (floorplan.schema.create) >>
+      (floorplan += Room("enter",  "room 1")) >>
+      (floorplan += Room("room 1", "room 2")) >>
+      (floorplan += Room("room 2", "room 3")) >>
+      (floorplan += Room("room 3", "exit"))
+    }
+
+    def unfold[T]
+      (z: T, acc: Seq[T] = Seq.empty)
+      (f: T => DBIO[Option[T]]): DBIO[Seq[T]] =
+      f(z).flatMap {
+        case None    => DBIO.successful(acc)
+        case Some(t) => unfold(t, z +: acc)(f)
+      }
+
+    println("\nRoom path:")
+    val sa: DBIO[Seq[String]] =
+      unfold("enter") {
+         r => floorplan.filter(_.name === r).map(_.next).result.headOption
+       }
+    println( exec(sa) )
 
     def currentState() = {
       println("\nState of the database:")
