@@ -162,7 +162,6 @@ object Example extends App {
     println("\nZipped actions:")
     println(exec(countAndHal))
 
-
     //
     // Transactions
     //
