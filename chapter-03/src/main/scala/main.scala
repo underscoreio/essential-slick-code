@@ -2,7 +2,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.H2Driver.api._
-import slick.lifted.ProvenShape.proveShapeOf
 import scala.util.Try
 
 object Example extends App {
@@ -21,7 +20,6 @@ object Example extends App {
   // Table:
   lazy val messages = TableQuery[MessageTable]
 
-
   // Database connection details:
   def db = Database.forConfig("chapter03")
 
@@ -30,16 +28,24 @@ object Example extends App {
     Await.result(db.run(program), 5000 milliseconds)
 
 
+  def testData = Seq(
+    Message("Dave", "Hello, HAL. Do you read me, HAL?"),
+    Message("HAL",  "Affirmative, Dave. I read you."),
+    Message("Dave", "Open the pod bay doors, HAL."),
+    Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."))
+
   def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  for {
     //Create the table:
     _     <- messages.schema.create
     // Add some data:
-    count <- messages ++= Seq(
-      Message("Dave", "Hello, HAL. Do you read me, HAL?"),
-      Message("HAL",  "Affirmative, Dave. I read you."),
-      Message("Dave", "Open the pod bay doors, HAL."),
-      Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."))
+    count <- messages ++= testData
   } yield count
+
+  // Utility to print out what is in the database
+  def printCurrentDatabaseState() = {
+    println("\nState of the database:")
+    exec(messages.result.map(_.foreach(println)))
+  }
 
   try {
     exec(populate)
@@ -50,16 +56,17 @@ object Example extends App {
     val id = exec((messages returning messages.map(_.id)) += Message("HAL", "I'm back"))
     println(s"The ID inserted was: $id")
 
-
     // -- DELETES --
 
     // Delete messages from HAL:
-    // NB: will be zero rows affected because we've renamed HAL to HALL 9000
     println("\nDeleting messages from HAL:")
     val rowsDeleted = exec(messages.filter(_.sender === "HAL").delete)
     println(s"Rows deleted: $rowsDeleted")
 
+    // Repopulate the database
+    exec( messages ++= testData.filter(_.sender == "HAL") )
 
+    printCurrentDatabaseState()
 
     // -- UPDATES --
 
@@ -128,91 +135,49 @@ object Example extends App {
         case n     => insert(n)
       }
 
-    //
-    // unfold
-    //
 
-    final case class Room(name: String, next: String)
+    // Fold:
 
-    final class FloorPlan(tag: Tag) extends Table[Room](tag, "floorplan") {
-      def name = column[String]("name")
-      def next = column[String]("next")
-      def * = (name, next) <> (Room.tupled, Room.unapply)
-    }
+    // Feel free to implement a more realistic measure!
+    def sentiment(m: Message): Int = scala.util.Random.nextInt(100)
+    def isHappy(message: Message): Boolean = sentiment(message) > 50
 
-    lazy val floorplan = TableQuery[FloorPlan]
+    def sayingsOf(crewName: String): DBIO[Seq[Message]] =
+      messages.filter(_.sender === crewName).result
 
-    exec {
-      (floorplan.schema.create) >>
-      (floorplan += Room("enter",  "room 1")) >>
-      (floorplan += Room("room 1", "room 2")) >>
-      (floorplan += Room("room 2", "room 3")) >>
-      (floorplan += Room("room 3", "exit"))
-    }
+    val actions: List[DBIO[Seq[Message]]] =
+      sayingsOf("Dave") :: sayingsOf("HAL") :: Nil
 
-    def unfold[T]
-      (z: T, acc: Seq[T] = Seq.empty)
-      (f: T => DBIO[Option[T]]): DBIO[Seq[T]] =
-      f(z).flatMap {
-        case None    => DBIO.successful(acc)
-        case Some(t) => unfold(t, z +: acc)(f)
+    val roseTinted: DBIO[Seq[Message]] =
+      DBIO.fold(actions, Seq.empty) {
+        (happy, crewMessages) => crewMessages.filter(isHappy) ++ happy
       }
 
-    println("\nRoom path:")
-    val sa: DBIO[Seq[String]] =
-      unfold("enter") {
-         r => floorplan.filter(_.name === r).map(_.next).result.headOption
-       }
-    println( exec(sa) )
+    println("\nHappy messages from fold:")
+    println(exec(roseTinted))
 
-    def currentState() = {
-      println("\nState of the database:")
-      exec(messages.result.map(_.foreach(println)))
-    }
-
-    currentState
-
-    // TODO: Why do we need this?   Maybe for exercises...
-    exec(messages returning messages.map(_.id) += Message("Dave", "Point taken." ))
+    // Zip
+    val countAndHal: DBIO[(Int, Seq[Message])] =
+      messages.size.result zip messages.filter(_.sender === "HAL 9000").result
+    println("\nZipped actions:")
+    println(exec(countAndHal))
 
 
+    //
+    // Transactions
+    //
 
-    def updateContent(id: Long) =
-      messages.filter(_.id === id).map(_.content)
+    val willRollback = (
+      (messages += Message("HAL",  "Daisy, Daisy..."))                   >>
+      (messages += Message("Dave", "Please, anything but your singing")) >>
+       DBIO.failed(new Exception("agggh my ears"))                       >>
+      (messages += Message("HAL", "Give me your answer do"))
+      ).transactionally
 
-    try {
-      exec {
-        (
-        updateContent(2L).update("Blue Mooon")                          andThen
-        updateContent(3L).update("Please, anything but your singing ")  andThen
-        messages.result.map(_.foreach { println })                      andThen
-        DBIO.failed(new Exception("agggh my ears"))                     andThen
-        updateContent(4L).update("That's incredibly hurtful")
-        ).transactionally
-      }
+    println("\nResult from rolling back:")
+    println(exec(willRollback.asTry))
+    printCurrentDatabaseState
 
-    } catch {
-      case weKnow: Throwable => println("expected")
-    }
-
-    currentState
   } finally db.close
-
-  //Exercises
-
-  //Insert only once
-  /*
-  def insertOnce(sender: String, text: String): Long = ???
-
-  println(insertOnce("Dave","Have you changed the locks?") == insertOnce("Dave","Have you changed the locks?"))
-
-  //Update Using a For Comprehension
-  val rowsAffected = messages.
-                     filter(_.sender === "HAL").
-                     map(msg => (msg.sender)).
-                     update("HAL 9000")
-
-  val rowsAffectedUsingForComprehension = ???
-  */
 
 }
