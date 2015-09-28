@@ -21,7 +21,7 @@ object Example extends App {
   lazy val messages = TableQuery[MessageTable]
 
   // Database connection details:
-  def db = Database.forConfig("chapter03")
+  val db = Database.forConfig("chapter03")
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T =
