@@ -7,7 +7,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import slick.dbio._
 import slick.driver.JdbcProfile
 import slick.lifted.MappedTo
-import slick.lifted.ProvenShape.proveShapeOf
+
+// Code relating to 4.4.1 "Value Classes"
 
 object ValueClassesExample extends App {
 
@@ -15,6 +16,9 @@ object ValueClassesExample extends App {
     val profile:  JdbcProfile
   }
 
+  //
+  // A primary key type for each of our tables:
+  //
   object PKs {
     import slick.lifted.MappedTo
     case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]
@@ -27,11 +31,17 @@ object ValueClassesExample extends App {
     import profile.api._
     import PKs._
 
+    //
+    // DateTime <-> Timestamp mapping
+    //
     implicit val jodaDateTimeType =
       MappedColumnType.base[DateTime, Timestamp](
         dt => new Timestamp(dt.getMillis),
         ts => new DateTime(ts.getTime, UTC))
 
+    //
+    // User table using UserPK as a primary key type
+    //
     case class User(name: String, id: UserPK = UserPK(0L))
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
@@ -44,6 +54,10 @@ object ValueClassesExample extends App {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
+    //
+    // Message table using a MessagePK as a primary key,
+    // and referencing UserPK as a foreign key.
+    //
     case class Message(
         senderId: UserPK,
         content:  String,
@@ -64,7 +78,6 @@ object ValueClassesExample extends App {
     lazy val messages = TableQuery[MessageTable]
 
     lazy val ddl = users.schema ++ messages.schema
-
   }
 
 
@@ -96,14 +109,22 @@ object ValueClassesExample extends App {
   } yield count
 
   // Won't compile:
-  //users.filter(_.id === 6L)
-  //val halId = UserPK(3L)
-  //val rubbish = for {
-  //  id      <- messages.filter(_.senderId === halId).map(_.id)
-  //  rubbish <- messages.filter(_.senderId === id)
-  //} yield rubbish
+  /*
+  users.filter(_.id === 6L)
+  val halId = UserPK(3L)
+  val rubbish = for {
+   id      <- messages.filter(_.senderId === halId).map(_.id)
+   rubbish <- messages.filter(_.senderId === id)
+  } yield rubbish
+  */
 
 
+  exec(program)
 
-  exec(program).foreach { count => println(s"message count: $count") }
+  println("\nMessages in the database:")
+  println(exec(messages.result))
+
+  println("\nUsers in the database:")
+  println(exec(users.result))
+
 }
