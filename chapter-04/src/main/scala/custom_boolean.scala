@@ -8,8 +8,10 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 import slick.lifted.MappedTo
-import slick.lifted.ProvenShape.proveShapeOf
 
+//
+// Solution to "Custom Boolean" exercise
+//
 
 object CustomBooleanExample extends App {
 
