@@ -3,12 +3,13 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
-import slick.lifted.ProvenShape.proveShapeOf
+
+// Code relating to 4.3.2 "Primary Keys".
 
 object PKExample extends App {
 
   trait Profile {
-    val profile:JdbcProfile
+    val profile: JdbcProfile
   }
 
   trait Tables {
@@ -16,6 +17,9 @@ object PKExample extends App {
 
     import profile.api._
 
+    //
+    // The names "HAL", "Dave" and so on, are now stored in a user table:
+    //
     case class User(id: Option[Long], name: String, email: Option[String] = None)
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
@@ -29,6 +33,9 @@ object PKExample extends App {
     lazy val users = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
+    //
+    // We also represent the various rooms on the ship:
+    //
     case class Room(title: String, id: Long = 0L)
 
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
@@ -40,6 +47,9 @@ object PKExample extends App {
     lazy val rooms = TableQuery[RoomTable]
     lazy val insertRoom = rooms returning rooms.map(_.id)
 
+    //
+    // A user can be in a room, which we represent in the "occupant" table:
+    //
     case class Occupant(roomId: Long, userId: Long)
 
     class OccupantTable(tag: Tag) extends Table[Occupant](tag, "occupant") {
@@ -53,6 +63,9 @@ object PKExample extends App {
 
     lazy val occupants = TableQuery[OccupantTable]
 
+    //
+    // The schema for all three tables:
+    //
     lazy val ddl = users.schema ++ rooms.schema ++ occupants.schema
   }
 
@@ -67,9 +80,10 @@ object PKExample extends App {
 
   val db = Database.forConfig("chapter04")
 
-  // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)
-
+  //
+  // Set up the database, populate rooms and users,
+  // and place Dave in the Air Lock:
+  //
   val init = for {
     _         <- ddl.create
     daveId    <- insertUser += User(None, "Dave", Some("dave@example.org"))
@@ -80,7 +94,11 @@ object PKExample extends App {
   } yield ()
 
   exec(init)
+
+  println("\nUsers database contains:")
   exec(users.result).foreach { println}
+
+  println("\nOccupation is:")
   exec(occupants.result).foreach { println}
 
 }
