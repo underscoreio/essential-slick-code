@@ -4,6 +4,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
 
+// Code relating to 4.3.1 "Nullable Columns"
+
 object NullExample extends App {
 
   trait Profile {
