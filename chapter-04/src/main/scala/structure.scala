@@ -38,10 +38,13 @@ trait Tables {
   }
 
   object messages extends TableQuery( new MessageTable(_)) {
-    val findBySender = this.findBy(_.sender)
-    val numSenders   = this.map(_.sender).countDistinct
+
+    def messagesFrom(name: String) =
+      this.filter(_.sender === name)
+
+    val numSenders = this.map(_.sender).countDistinct
   }
-  
+
 }
 
 
