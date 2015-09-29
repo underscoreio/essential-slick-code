@@ -48,14 +48,12 @@ object NullExample extends App {
     folks  <- users.result
   } yield folks
 
-  val sortingOnNullableExample = for {
-    _ <- users.schema.create
-    daveId <- insertUser += User("Dave", Some("dave@example.org"))
-    halId  <- insertUser += User("HAL")
-    elena  <- insertUser += User("Elena", Some("elena@example.org"))
-    folks  <- users.sortBy { _.name.desc.nullsLast }.result
-  } yield folks
-  
-  
+
+  println("\nUsers with optional email addresses:")
   exec(program).foreach { println }
+
+  println("\nUsers sorted with NULLs last")
+  val sortingOnNullableExample = users.sortBy { _.name.asc.nullsLast }.result
+  exec(sortingOnNullableExample).foreach { println }
+
 }
