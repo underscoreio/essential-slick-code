@@ -5,7 +5,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Example  {
+object Example extends App {
 
   // Case class representing a row in our table:
   final case class Message(
@@ -46,7 +46,8 @@ object Example  {
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2.seconds)
 
-  def main(args:Array[String]) = {
+  try {
+
     // Create the "messages" table:
     println("Creating database table")
     exec(messages.schema.create)
@@ -68,5 +69,7 @@ object Example  {
         result
       }
     )
-  }
+
+  } finally db.close
+
 }
