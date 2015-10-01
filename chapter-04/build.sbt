@@ -26,6 +26,9 @@ libraryDependencies ++= Seq(
 
 initialCommands in console := """
   |import slick.driver.H2Driver.api._
-  |import StructureExample._
-  |StructureExample.main(Array())
+  |import scala.concurrent.ExecutionContext.Implicits.global
+  |import scala.concurrent.Await
+  |import scala.concurrent.duration._
+  |val db = Database.forConfig("chapter04")
+  |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
 """.trim.stripMargin
