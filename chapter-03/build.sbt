@@ -16,12 +16,17 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"           % "3.1.0-RC1",
+  "com.typesafe.slick" %% "slick"           % "3.1.0-RC2",
   "com.h2database"      % "h2"              % "1.4.185",
   "ch.qos.logback"      % "logback-classic" % "1.1.2")
 
 initialCommands in console := """
   |import slick.driver.H2Driver.api._
   |import Example._
-  |Example.main(Array())
+  |import scala.concurrent.Await
+  |import scala.concurrent.duration._
+  |import scala.concurrent.ExecutionContext.Implicits.global
+  |val db = Database.forConfig("chapter03")
+  |def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 5000 milliseconds)
+  |exec(populate)
 """.trim.stripMargin

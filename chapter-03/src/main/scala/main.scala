@@ -116,13 +116,6 @@ object Example extends App {
     println("\nAn 'encrypted' message from the database:")
     println(exec(encrypted))
 
-    // Filter and asTry:
-
-    println("\nFiltering for a 'long message':")
-    val longMsgAction: DBIO[Try[String]] = text.filter(s => s.length > 100).asTry
-    println(exec(longMsgAction))
-
-
     // FlatMap:
     val delete: DBIO[Int] = messages.delete
     def insert(count: Int) = messages += Message("NOBODY", s"I removed ${count} messages")
