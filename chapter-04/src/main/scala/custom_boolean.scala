@@ -118,6 +118,4 @@ object CustomBooleanExample extends App {
 
 
   println(s"query result ${exec(program)}" )
-
-
 }

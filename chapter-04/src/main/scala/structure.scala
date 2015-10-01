@@ -6,7 +6,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
-import slick.lifted.ProvenShape.proveShapeOf
 
 trait Profile {
   val profile : JdbcProfile
