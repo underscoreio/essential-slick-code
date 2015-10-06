@@ -1,5 +1,3 @@
-package chapter06
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent.duration._

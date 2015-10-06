@@ -63,20 +63,20 @@ Alternatively, use `runMain` or `~runMail` and supply the name of the class to r
 ```
 $ cd chapter-04
 $ ./sbt.sh
-> ~runMain chapter04.StructureExample
+> ~runMain StructureExample
 ```
 
 The examples are:
 
-1. `chapter04.StructureExample` in _structure.scala_ - an illustration of separating schema and profile.
-2. `chapter04.HListExampleApp` in _hlists.scala_ - the HList example from the book.
-3. `chapter04.NestedCaseClassExampleApp` in _nested_case_class.scala_ - is the exercise on custom case class mapping.
-4. `chapter04.NullExample` in _nulls.scala_ - where the `User` table has an optional `email` field.
-5. `chapter04.PKExample` in _primary_keys.scala_ - the `User.id` becomes an `Option[Long]`, and the `OccupantTable` is added.
-6. `chapter04.ForeignKeyExample` in _foreign_keys.scala_ - where `MessageTable` has a foreign key to the `UserTable`.
-7. `chapter04.ValueClassesExample` in _value_classes.scala_ - introduces types for primary keys, as `MessagePK` and `UserPk`.
-8. `chapter04.SumTypesExample` in _sum_types.scala_ - the message `Flag`ing example from the book.
-9. `chapter04.CustomBooleanExample` in _custom_boolean.scala_ - is the "Custom Boolean" exercise code.
+1. `StructureExample` in _structure.scala_ - an illustration of separating schema and profile.
+2. `HListExampleApp` in _hlists.scala_ - the HList example from the book.
+3. `NestedCaseClassExampleApp` in _nested_case_class.scala_ - is the exercise on custom case class mapping.
+4. `NullExample` in _nulls.scala_ - where the `User` table has an optional `email` field.
+5. `PKExample` in _primary_keys.scala_ - the `User.id` becomes an `Option[Long]`, and the `OccupantTable` is added.
+6. `ForeignKeyExample` in _foreign_keys.scala_ - where `MessageTable` has a foreign key to the `UserTable`.
+7. `ValueClassesExample` in _value_classes.scala_ - introduces types for primary keys, as `MessagePK` and `UserPk`.
+8. `SumTypesExample` in _sum_types.scala_ - the message `Flag`ing example from the book.
+9. `CustomBooleanExample` in _custom_boolean.scala_ - is the "Custom Boolean" exercise code.
 
 ### Chapter 5 (Joins and Aggregates)
 
