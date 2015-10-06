@@ -1,5 +1,3 @@
-package chapter06
-
 import slick.driver.{JdbcProfile, JdbcDriver}
 import slick.lifted.MappedTo
 

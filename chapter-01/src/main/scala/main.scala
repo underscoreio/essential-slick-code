@@ -33,7 +33,7 @@ object Example extends App {
   }
 
   // Base query for querying the messages table:
-  lazy val messages = TableQuery[MessageTable]
+  val messages = TableQuery[MessageTable]
 
   // An example query that selects a subset of messages:
   val halSays = messages.filter(_.sender === "HAL")
