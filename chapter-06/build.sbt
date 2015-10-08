@@ -26,4 +26,17 @@ libraryDependencies ++= Seq(
   "joda-time"           % "joda-time"             % "2.6",
   "org.joda"            % "joda-convert"          % "1.2")
 
+initialCommands in console := """
+  |import scala.concurrent.ExecutionContext.Implicits.global
+  |import scala.concurrent.Await
+  |import scala.concurrent.duration._
+  |import ChatSchema._
+  |val schema = new Schema(slick.driver.H2Driver)
+  |import schema._
+  |import profile.api._
+  |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
+  |val db = Database.forConfig("chapter06")
+  |exec(populate)
+""".trim.stripMargin
+
 triggeredMessage in ThisBuild := Watched.clearWhenTriggered
