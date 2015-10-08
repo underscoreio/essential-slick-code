@@ -98,34 +98,41 @@ object ChatSchema {
       val airLockConversation = new DateTime(2001, 2, 17, 10, 22, 50)
       // A few messages in the Pod:
       val podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
+      //HAL monologue 
+      val halMonologue = new DateTime(2001, 2, 17, 22, 50, 0)
       
       val program = for {
-        _         <- ddl.create
-        daveId    <- insertUser += User("Dave", Some("dave@example.org"))
-        halId     <- insertUser += User("HAL")
-        elenaId   <- insertUser += User("Elena", Some("elena@example.org"))
-        frankId   <- insertUser += User("Frank", Some("frank@example.org"))
-        airLockId <- insertRoom += Room("Air Lock")
-        podId     <- insertRoom += Room("Pod")
-        brainId   <- insertRoom += Room("Brain Room")
-        a         <- occupants ++= List(
+        _          <- ddl.create
+        daveId     <- insertUser += User("Dave", Some("dave@example.org"))
+        halId      <- insertUser += User("HAL")
+        elenaId    <- insertUser += User("Elena", Some("elena@example.org"))
+        frankId    <- insertUser += User("Frank", Some("frank@example.org"))
+        airLockId  <- insertRoom += Room("Air Lock")
+        podId      <- insertRoom += Room("Pod")
+        quartersId <- insertRoom += Room("Crew Quarters")        
+        a          <- occupants ++= List(
                        Occupant(airLockId, daveId),
                        Occupant(airLockId, halId),
                        Occupant(podId, daveId),
                        Occupant(podId, frankId),
                        Occupant(podId, halId) )
-        b         <- messages ++= Seq(
+        b          <- messages ++= Seq(
                        Message(daveId, "Hello, HAL. Do you read me, HAL?",             airLockConversation,               Some(airLockId)),
                        Message(halId,  "Affirmative, Dave. I read you.",               airLockConversation plusSeconds 2, Some(airLockId)),
                        Message(daveId, "Open the pod bay doors, HAL.",                 airLockConversation plusSeconds 4, Some(airLockId)),
                        Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", airLockConversation plusSeconds 6, Some(airLockId)))
-        c         <- messages ++= Seq(
+        c          <- messages ++= Seq(
                        Message(frankId, "Well, whaddya think?", podConversation, Some(podId)),
                        Message(daveId, "I'm not sure, what do you think?", podConversation plusSeconds 4, Some(podId)))
-        d         <- messages ++= Seq(
+        d          <- messages ++= Seq(
                        Message(frankId, "Are you thinking what I'm thinking?", podConversation plusSeconds 6, Some(podId), toId=Some(daveId)),
                        Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
-      } yield (a,b,c,d)
+        e          <-  messages ++= Seq(
+                       Message(halId, "I am a HAL 9000 computer.",                                                                 halMonologue              , None, toId=None),
+                       Message(halId, "I became operational at the H.A.L. plant in Urbana, Illinois on the 12th of January 1992.", halMonologue plusSeconds 4, None, toId=None))              
+      } yield (a,b,c,d,e)
+      
+       
       
       program
 
