@@ -10,10 +10,10 @@ import slick.lifted.MappedTo
 
 // Code relating to 4.4.1 "Value Classes"
 
-object ValueClassesExample extends App {
+object ChatSchema {
 
   trait Profile {
-    val profile:  JdbcProfile
+    val profile: JdbcProfile
   }
 
   //
@@ -51,7 +51,7 @@ object ValueClassesExample extends App {
       def * = (name, id) <> (User.tupled, User.unapply)
     }
 
-    lazy val users = TableQuery[UserTable]
+    lazy val users      = TableQuery[UserTable]
     lazy val insertUser = users returning users.map(_.id)
 
     //
@@ -59,10 +59,10 @@ object ValueClassesExample extends App {
     // and referencing UserPK as a foreign key.
     //
     case class Message(
-        senderId: UserPK,
-        content:  String,
-        ts:       DateTime,
-        id:       MessagePK = MessagePK(0L))
+      senderId: UserPK,
+      content:  String,
+      ts:       DateTime,
+      id:       MessagePK = MessagePK(0L))
 
     class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
       def id       = column[MessagePK]("id", O.PrimaryKey, O.AutoInc)
@@ -72,16 +72,37 @@ object ValueClassesExample extends App {
 
       def * = (senderId, content, ts, id) <> (Message.tupled, Message.unapply)
 
-      def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
+      def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete = ForeignKeyAction.Cascade)
     }
 
     lazy val messages = TableQuery[MessageTable]
+    lazy val ddl      = users.schema ++ messages.schema
 
-    lazy val ddl = users.schema ++ messages.schema
+    def populate = {
+
+      // Insert the conversation, which took place in Feb, 2001:
+      val start = new DateTime(2001, 2, 17, 10, 22, 50)
+
+      for {
+        _      <- ddl.create
+        halId  <- insertUser += User("HAL")
+        daveId <- insertUser += User("Dave")
+        count  <- messages   ++= Seq(
+          Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
+          Message(halId, "Affirmative, Dave. I read you.", start plusSeconds 2),
+          Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
+          Message(halId, "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
+      } yield count
+
+    }
   }
 
-
   class Schema(val profile: slick.driver.JdbcProfile) extends Tables with Profile
+
+}
+
+object ValueClassesExample extends App {
+  import ChatSchema._
 
   val schema = new Schema(slick.driver.H2Driver)
 
@@ -93,21 +114,7 @@ object ValueClassesExample extends App {
 
   val db = Database.forConfig("chapter04")
 
-  // Insert the conversation, which took place in Feb, 2001:
-  val start = new DateTime(2001, 2, 17, 10, 22, 50)
-
-  val program =
-    for {
-    _      <- ddl.create
-    halId  <- insertUser += User("HAL")
-    daveId <- insertUser += User("Dave")
-    count  <- messages ++= Seq(
-               Message(daveId, "Hello, HAL. Do you read me, HAL?", start),
-               Message(halId,  "Affirmative, Dave. I read you.", start plusSeconds 2),
-               Message(daveId, "Open the pod bay doors, HAL.", start plusSeconds 4),
-               Message(halId,  "I'm sorry, Dave. I'm afraid I can't do that.", start plusSeconds 6))
-  } yield count
-
+  exec(populate)
   // Won't compile:
   /*
   users.filter(_.id === 6L)
@@ -117,9 +124,6 @@ object ValueClassesExample extends App {
    rubbish <- messages.filter(_.senderId === id)
   } yield rubbish
   */
-
-
-  exec(program)
 
   println("\nMessages in the database:")
   println(exec(messages.result))

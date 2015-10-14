@@ -25,10 +25,17 @@ libraryDependencies ++= Seq(
   "org.joda"            % "joda-convert"    % "1.2")
 
 initialCommands in console := """
-  |import slick.driver.H2Driver.api._
   |import scala.concurrent.ExecutionContext.Implicits.global
   |import scala.concurrent.Await
   |import scala.concurrent.duration._
-  |val db = Database.forConfig("chapter04")
+  |import ChatSchema._
+  |val schema = new Schema(slick.driver.H2Driver)
+  |import schema._
+  |import profile.api._
+  |import PKs._
   |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
+  |val db = Database.forConfig("chapter04")
+  |exec(populate)
 """.trim.stripMargin
+
+
