@@ -1,8 +1,8 @@
 name := "essential-slick-chapter-05"
 
-version := "1.0"
+version := "3.0"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -14,10 +14,9 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-
 libraryDependencies ++= Seq(
   "org.scala-lang"      % "scala-reflect"         % scalaVersion.value,
-  "com.typesafe.slick" %% "slick"                 % "2.1.0",
+  "com.typesafe.slick" %% "slick"                 % "3.1.0",
   "com.h2database"      % "h2"                    % "1.4.185",
   "org.postgresql"      % "postgresql"            % "9.3-1100-jdbc41",
   "mysql"               % "mysql-connector-java"  % "5.1.35",
@@ -26,3 +25,15 @@ libraryDependencies ++= Seq(
   "org.joda"            % "joda-convert"          % "1.2")
 
 triggeredMessage in ThisBuild := Watched.clearWhenTriggered
+
+initialCommands in console := """
+  |import scala.concurrent.ExecutionContext.Implicits.global
+  |import scala.concurrent.Await
+  |import scala.concurrent.duration._
+  |import ChatSchema._
+  |val schema = Schema(slick.driver.H2Driver)
+  |import schema._, schema.profile.api._
+  |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
+  |val db = Database.forConfig("chapter05")
+  |exec(populate)
+""".trim.stripMargin
