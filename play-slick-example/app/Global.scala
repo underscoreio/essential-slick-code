@@ -11,8 +11,8 @@ import play.api.GlobalSettings
 object Global extends GlobalSettings {
 
   //When the application starts up, populate the schema.
-  //override def onStart(app: Application) = Await.result(Schema.populate, Duration.Inf)
-  //Better hope the schema populates before anything that depending on it calls.
-  override def onStart(app: Application):Unit = Schema.populate
-  
+  override def onStart(app: Application):Unit = {
+    Await.result(Schema.populate, Duration.Inf)
+  }
+
 }

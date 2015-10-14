@@ -6,26 +6,27 @@ import play.api.db.slick.HasDatabaseConfig
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.Play
 import play.api.Play.current
-import slick.driver.JdbcDriver
+
 import slick.lifted.MappedTo
 import slick.backend.DatabaseConfig
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import slick.driver.JdbcProfile
+import slick.driver._
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone._
 import play.api.db.slick.HasDatabaseConfigProvider
+import slick.profile.RelationalProfile
 
 
 object ChatSchema {
-  
+
   case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Tables {
-    this: HasDatabaseConfig[JdbcProfile] => 
-    
+    this: HasDatabaseConfig[JdbcProfile] =>
+
     import driver.api._
-          
+
     case class User(name: String, email: Option[String] = None, id: PK[UserTable] = PK(0))
 
     class UserTable(tag: Tag) extends Table[User](tag, "user") {
@@ -92,17 +93,17 @@ object ChatSchema {
     lazy val messages = TableQuery[MessageTable]
 
     lazy val ddl = users.schema ++ rooms.schema ++ occupants.schema ++ messages.schema
-     
+
     // Sample data set
-    protected def schemaPopulate = {
+    protected val schemaPopulate = {
 
       // Insert the conversation, which took place in Feb, 2001:
       val airLockConversation = new DateTime(2001, 2, 17, 10, 22, 50)
       // A few messages in the Pod:
       val podConversation = new DateTime(2001, 2, 16, 20, 55, 0)
-      //HAL monologue 
+      //HAL monologue
       val halMonologue = new DateTime(2001, 2, 17, 22, 50, 0)
-      
+
       val program = for {
         _          <- ddl.create
         daveId     <- insertUser += User("Dave", Some("dave@example.org"))
@@ -111,7 +112,7 @@ object ChatSchema {
         frankId    <- insertUser += User("Frank", Some("frank@example.org"))
         airLockId  <- insertRoom += Room("Air Lock")
         podId      <- insertRoom += Room("Pod")
-        quartersId <- insertRoom += Room("Crew Quarters")        
+        quartersId <- insertRoom += Room("Crew Quarters")
         a          <- occupants ++= List(
                        Occupant(airLockId, daveId),
                        Occupant(airLockId, halId),
@@ -131,29 +132,27 @@ object ChatSchema {
                        Message(daveId, "Maybe", podConversation plusSeconds 8, Some(podId), toId=Some(frankId)))
         e          <-  messages ++= Seq(
                        Message(halId, "I am a HAL 9000 computer.",                                                                 halMonologue              , None, toId=None),
-                       Message(halId, "I became operational at the H.A.L. plant in Urbana, Illinois on the 12th of January 1992.", halMonologue plusSeconds 4, None, toId=None))              
+                       Message(halId, "I became operational at the H.A.L. plant in Urbana, Illinois on the 12th of January 1992.", halMonologue plusSeconds 4, None, toId=None))
       } yield (a,b,c,d,e)
-      
+
       program
-    }     
-    
+    }
+
     protected val namedMessages = for {
       msg <- messages
       usr <- msg.sender
-    } yield (usr.name, msg.content) 
-    
+    } yield (usr.name, msg.content)
+
   }
-  
+
   case object Schema extends HasDatabaseConfig[JdbcProfile] with Tables {
-    //We use DatabaseConfigProvider to retrieve a database config
-    protected val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
-    //override val dbConfig = DatabaseConfigProvider.get[JdbcProfile]
-     
-    //and import the appropriate driver API    
+
+    protected lazy val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+
     import driver.api._
-    
-    def populate    = db.run(schemaPopulate)    
-    def msgs        = db.run(namedMessages.result)     
+
+    def populate    = db.run(schemaPopulate)
+    def msgs        = db.run(namedMessages.result)
 
   }
 }
