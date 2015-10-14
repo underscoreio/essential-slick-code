@@ -1,0 +1,4 @@
+GET   /                     controllers.DataController.index
+GET   /assets/*file         controllers.Assets.versioned(path="/public", file: Asset)
+GET   /data/messages        controllers.DataController.messages
+ 

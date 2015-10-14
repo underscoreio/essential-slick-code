@@ -4,3 +4,4 @@ target
 *.db
 .settings
 .cache-main
+play-slick-example/logs/application.log
