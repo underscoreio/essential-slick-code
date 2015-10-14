@@ -140,5 +140,4 @@ object ChatSchema {
   }
 
   case class Schema(val profile: JdbcProfile) extends Tables with Profile
-  case class DB(driver: JdbcDriver, url: String, clazz: String)
 }
