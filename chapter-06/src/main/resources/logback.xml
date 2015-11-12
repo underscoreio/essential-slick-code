@@ -8,8 +8,8 @@
   <logger name="slick"                              level="INFO"/>
   <logger name="slick.ast"                          level="INFO"/>
   <logger name="slick.compiler"                     level="INFO"/>
-  <logger name="slick.jdbc.JdbcBackend.statement"   level="INFO"/>
-  <logger name="slick.jdbc.StatementInvoker.result" level="INFO"/>
+  <logger name="slick.jdbc.JdbcBackend.statement"   level="DEBUG"/>
+  <logger name="slick.jdbc.StatementInvoker.result" level="DEBUG"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

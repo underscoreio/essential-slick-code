@@ -7,13 +7,12 @@ _Essential Slick_ provides a compact, no-nonsense guide to everything you need t
 *    Chapter 1 provides an abbreviated overview of the library as a whole, demonstrating the fundamentals of data modelling, connecting to the database, and running queries.
 *    Chapter 2 covers basic select queries, introducing Slick’s query language and delving into some of the details of type inference and type checking.
 *    Chapter 3 covers queries for inserting, updating, and deleting data.
-*    Chapter 4 discusses data modelling, including defining custom column and table types.
-*    Chapter 5 explores advanced select queries, including joins and aggregates.
-*    Chapter 6 provides a brief overview of Plain SQL queries. This is a useful tool when you need fine control over the SQL sent to your database.
+*    Chapter 4 looks at action combinators.
+*    Chapter 5 discusses data modelling, including defining custom column and table types.
+*    Chapter 6 explores advanced select queries, including joins and aggregates.
+*    Chapter 7 provides a brief overview of Plain SQL queries. This is a useful tool when you need fine control over the SQL sent to your database.
 
-To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/training/courses/essential-slick/).
-
-This is the early edition is for Slick 3. Chapters 1, 2, and 6 are available.
+To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/books/essential-slick/).
 
   _If you're looking for the example code for Slick 2.1, use the [2.1 branch](https://github.com/underscoreio/essential-slick-code/tree/2.1)_.
 
@@ -24,7 +23,7 @@ The code is organised as a folder for each chapter. Each folder contains an SBT 
 Each file is either the examples from the book, or the scaffolding for the exercises.
 
 
-### Chapter 1 (Basics), 2 (Selecting Data) and 3 (Creating and Modifying Data)
+### Chapter 1 (Basics), 2 (Selecting Data), 3 (Creating and Modifying Data), and 4 (Action Combinators)
 
 These projects contain a single source file, _main.scala_. Use the SBT `run` or `~run` command.
 
@@ -32,7 +31,7 @@ For example:
 
 ```
 $ cd chapter-01
-$ $ ./sbt.sh
+$ ./sbt.sh
 ...
 > run
 ...
@@ -51,17 +50,16 @@ Selecting only messages from HAL:
 Message(HAL,Affirmative, Dave. I read you.,2)
 Message(HAL,I'm sorry, Dave. I'm afraid I can't do that.,4)
 [success] Total time: 5 s, completed 06/05/2015 2:22:22 PM
-
 ```
 
-### Chapter 4 (Data Modelling)
+### Chapter 5 (Data Modelling)
 
-Chapter 4 contains several applications. Using the SBT `run` command will prompt you for the file to run.
+Chapter 5 contains several applications. Using the SBT `run` command will prompt you for the file to run.
 
 Alternatively, use `runMain` or `~runMail` and supply the name of the class to run a particular example:
 
 ```
-$ cd chapter-04
+$ cd chapter-05
 $ ./sbt.sh
 > ~runMain StructureExample
 ```
@@ -78,25 +76,24 @@ The examples are:
 8. `SumTypesExample` in _sum_types.scala_ - the message `Flag`ing example from the book.
 9. `CustomBooleanExample` in _custom_boolean.scala_ - is the "Custom Boolean" exercise code.
 
-### Chapter 5 (Joins and Aggregates)
+### Chapter 6 (Joins and Aggregates)
 
 This project contains a _chat_schema.scala_ file that defines the schema for the chapter.
 It also defines the method `populate` which inserts our standard cast, rooms, and messages into the database.
 
 The schema is re-used in the following examples:
 
-1. `chapter05.JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
-2. `chapter05.AggregatesExample` in _aggregates.scala_ - various group by and aggregation examples..
-
+1. `JoinsExample` in _joins.scala_ - runs through a variety of joins using the sample data in _chat_schema.scala_.
+2. `AggregatesExample` in _aggregates.scala_ - various group by and aggregation examples..
 
 _joins.scala_ contains much that is commented out.  Remove the comments from around the code you are interest in to run it.
 
 
-### Chapter 6 (Plain SQL)
+### Chapter 7 (Plain SQL)
 
 This project contains the following examples:
 
-1. `chapter06.SelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
-2. `chapter06.UpdateExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.
-3. `chapter06.TsqlExample` in _tsql.scala_ - examples using typed plain queries.
+1. `SelectExample` in _select.scala_ - gives examples with the `sql` interpolator.
+2. `UpdateExample` in _updates.scala_ - gives examples with the `sqlu` interpolator.
+3. `TsqlExample` in _tsql.scala_ - examples using typed plain queries.
 
