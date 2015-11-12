@@ -11,7 +11,7 @@ object AggregatesExample extends App {
 
   val schema = new Schema(slick.driver.H2Driver)
   import schema._, profile.api._
-  val db = Database.forConfig("chapter05")
+  val db = Database.forConfig("chapter06")
   def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
 
   exec(populate)

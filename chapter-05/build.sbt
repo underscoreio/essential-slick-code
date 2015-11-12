@@ -34,7 +34,7 @@ initialCommands in console := """
   |import profile.api._
   |import PKs._
   |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
-  |val db = Database.forConfig("chapter04")
+  |val db = Database.forConfig("chapter05")
   |exec(populate)
 """.trim.stripMargin
 

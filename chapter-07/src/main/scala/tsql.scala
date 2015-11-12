@@ -44,7 +44,7 @@ object TsqlExample extends App {
     msg <- query
   } yield msg
 
-  val db = Database.forConfig("chapter06")
+  val db = Database.forConfig("chapter07")
   println("Content is:")
   val future = db.run(prog).map { _ foreach println }
   Await.result(future, 2 seconds)

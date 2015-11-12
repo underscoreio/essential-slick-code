@@ -13,7 +13,7 @@ object UpdateExample extends App {
   val schema = new Schema(slick.driver.H2Driver)
   import schema._, profile.api._
 
-  val db = Database.forConfig("chapter06")
+  val db = Database.forConfig("chapter07")
 
   // Helper method for running a query in this example file
   def exec[T](program: DBIO[T]): T =

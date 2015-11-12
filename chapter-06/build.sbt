@@ -34,6 +34,6 @@ initialCommands in console := """
   |val schema = Schema(slick.driver.H2Driver)
   |import schema._, schema.profile.api._
   |def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
-  |val db = Database.forConfig("chapter05")
+  |val db = Database.forConfig("chapter06")
   |exec(populate)
 """.trim.stripMargin

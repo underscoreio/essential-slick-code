@@ -26,7 +26,7 @@ initialCommands in console := """
   |import scala.concurrent.Await
   |import scala.concurrent.duration._
   |import scala.concurrent.ExecutionContext.Implicits.global
-  |val db = Database.forConfig("chapter03")
+  |val db = Database.forConfig("chapter04")
   |def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 5000 milliseconds)
   |exec(populate)
 """.trim.stripMargin
