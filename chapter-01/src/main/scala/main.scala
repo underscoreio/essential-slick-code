@@ -9,9 +9,9 @@ object Example extends App {
 
   // Case class representing a row in our table:
   final case class Message(
-    sender: String,
+    sender:  String,
     content: String,
-    id: Long = 0L)
+    id:      Long = 0L)
 
   // Helper method for creating test data:
   def freshTestData = Seq(
