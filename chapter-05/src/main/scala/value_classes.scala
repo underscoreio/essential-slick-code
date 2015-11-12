@@ -112,7 +112,7 @@ object ValueClassesExample extends App {
   import schema._, profile.api._
   import PKs._
 
-  val db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter05")
 
   exec(populate)
   // Won't compile:

@@ -47,7 +47,7 @@ object StructureExample extends App {
   // Use the schema:
   import schema._, profile.api._
 
-  val db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter05")
 
   // Insert the conversation
   val msgs = Seq(

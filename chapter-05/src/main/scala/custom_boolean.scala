@@ -98,7 +98,7 @@ object CustomBooleanExample extends App {
   def exec[T](action: DBIO[T]): T =
     Await.result(db.run(action), 2 seconds)
 
-  val db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter05")
 
  // Insert the conversation, which took place in Feb, 2001:
   val start = new DateTime(2001, 2, 17, 10, 22, 50)

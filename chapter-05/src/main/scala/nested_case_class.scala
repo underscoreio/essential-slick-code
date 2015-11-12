@@ -75,7 +75,7 @@ object NestedCaseClassExampleApp extends App {
   def exec[T](action: DBIO[T]): T =
     Await.result(db.run(action), 2 seconds)
 
-  val db = Database.forConfig("chapter04")
+  val db = Database.forConfig("chapter05")
 
   // Insert one user:
   val setup = for {
