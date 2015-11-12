@@ -41,7 +41,7 @@ object Example extends App {
   // Create an in-memory H2 database;
   val db = Database.forConfig("chapter01")
 
-  // Helper method for running a query in this example file
+  // Helper method for running a query in this example file:
   def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2 seconds)
 
   // Create the "messages" table:

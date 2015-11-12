@@ -11,7 +11,7 @@ object Example extends App {
   final case class Message(
     sender:  String,
     content: String,
-    id: Long = 0L)
+    id:      Long = 0L)
 
   // Helper method for creating test data:
   def freshTestData = Seq(
@@ -43,7 +43,7 @@ object Example extends App {
   // Create an in-memory H2 database;
   val db = Database.forConfig("chapter02")
 
-  // Helper method for running a query in this example file
+  // Helper method for running a query in this example file:
   def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2.seconds)
 
   try {
@@ -64,12 +64,11 @@ object Example extends App {
     println(
       exec {
         messages.
-        map(_.content).
-        filter(_ like "%Pretty%").
-        result
+          map(_.content).
+          filter(_ like "%Pretty%").
+          result
       }
     )
 
   } finally db.close
-
 }
