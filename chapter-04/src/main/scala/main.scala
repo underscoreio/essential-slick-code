@@ -23,10 +23,9 @@ object Example extends App {
   // Database connection details:
   val db = Database.forConfig("chapter04")
 
-  // Helper method for running a query in this example file
+  // Helper method for running a query in this example file:
   def exec[T](program: DBIO[T]): T =
     Await.result(db.run(program), 5000 milliseconds)
-
 
   def testData = Seq(
     Message("Dave", "Hello, HAL. Do you read me, HAL?"),
@@ -34,14 +33,13 @@ object Example extends App {
     Message("Dave", "Open the pod bay doors, HAL."),
     Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."))
 
-  def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  for {
-    //Create the table:
-    _     <- messages.schema.create
-    // Add some data:
-    count <- messages ++= testData
-  } yield count
+  def populate =
+    DBIO.seq(
+      messages.schema.create,
+      messages ++= testData
+    )
 
-  // Utility to print out what is in the database
+  // Utility to print out what is in the database:
   def printCurrentDatabaseState() = {
     println("\nState of the database:")
     exec(messages.result.map(_.foreach(println)))
@@ -50,21 +48,12 @@ object Example extends App {
   try {
     exec(populate)
 
-    //
-    // Action Combinators
-    //
-
     // Map:
+    val textAction: DBIO[Option[String]] =
+      messages.map(_.content).result.headOption
 
-    // http://rosettacode.org/wiki/Rot-13#Scala
-    def rot13(s: String) = s map {
-      case c if 'a' <= c.toLower && c.toLower <= 'm' => c + 13 toChar
-      case c if 'n' <= c.toLower && c.toLower <= 'z' => c - 13 toChar
-      case c => c
-    }
-
-    val text: DBIO[String] = messages.map(_.content).result.head
-    val encrypted: DBIO[String] = text.map(rot13) // obviously very weak "encryption"
+    val encrypted: DBIO[Option[String]] =
+      textAction.map(maybeText => maybeText.map(_.reverse))
 
     println("\nAn 'encrypted' message from the database:")
     println(exec(encrypted))
