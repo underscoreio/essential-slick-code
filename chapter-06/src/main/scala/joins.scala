@@ -171,14 +171,5 @@ object JoinsExample extends App {
       exec(query.result).foreach(println)
   */
 
-  //Scary queries
-  /*
-      val scary = users.
-                    join(messages).
-                    on(_.id === _.senderId).
-                    map{ case (u,m) => u.name -> m.content }
-
-       println(scary.result.statements)
-  */
 
 }
