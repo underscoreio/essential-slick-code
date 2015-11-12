@@ -72,28 +72,20 @@ object Example extends App {
 
 
     // Fold:
+    val report1: DBIO[Int] = DBIO.successful(41)
+    val report2: DBIO[Int] = DBIO.successful(1)
+    val reports: List[DBIO[Int]] = report1 :: report2 :: Nil
 
-    // Feel free to implement a more realistic measure!
-    def sentiment(m: Message): Int = scala.util.Random.nextInt(100)
-    def isHappy(message: Message): Boolean = sentiment(message) > 50
+    val summary: DBIO[Int] = DBIO.fold(reports, 0) {
+      (total, report) => total + report
+    }
 
-    def sayingsOf(crewName: String): DBIO[Seq[Message]] =
-      messages.filter(_.sender === crewName).result
-
-    val actions: List[DBIO[Seq[Message]]] =
-      sayingsOf("Dave") :: sayingsOf("HAL") :: Nil
-
-    val roseTinted: DBIO[Seq[Message]] =
-      DBIO.fold(actions, Seq.empty) {
-        (happy, crewMessages) => crewMessages.filter(isHappy) ++ happy
-      }
-
-    println("\nHappy messages from fold:")
-    println(exec(roseTinted))
+    println("\nSummary of all reports via fold:")
+    println(exec(summary))
 
     // Zip
     val countAndHal: DBIO[(Int, Seq[Message])] =
-      messages.size.result zip messages.filter(_.sender === "HAL 9000").result
+      messages.size.result zip messages.filter(_.sender === "HAL").result
     println("\nZipped actions:")
     println(exec(countAndHal))
 
