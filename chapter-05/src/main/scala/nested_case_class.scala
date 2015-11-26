@@ -3,7 +3,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 
-// Solution to exercixe 4.2.4.1
+// Solution to exercise 5.2.4.1
 
 object NestedCaseClassExampleApp extends App {
 

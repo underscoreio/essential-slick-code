@@ -4,7 +4,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 
-// Code relating to 4.3.2 "Primary Keys".
+// Code relating to 5.3.2 "Primary Keys".
 
 object PKExample extends App {
 

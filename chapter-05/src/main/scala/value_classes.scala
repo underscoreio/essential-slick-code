@@ -8,7 +8,7 @@ import slick.dbio._
 import slick.driver.JdbcProfile
 import slick.lifted.MappedTo
 
-// Code relating to 4.4.1 "Value Classes"
+// Code relating to 5.4.1 "Value Classes"
 
 object ChatSchema {
 

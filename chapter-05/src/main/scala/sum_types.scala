@@ -4,7 +4,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import slick.lifted.MappedTo
 
-// Code relating to 4.4.2 "Sum Types"
+// Code relating to 5.4.2 "Sum Types"
 
 object SumTypesExample extends App {
 
@@ -13,7 +13,7 @@ object SumTypesExample extends App {
   }
 
   // We represent primary keys using these mapped value classes
-  // described in section 4.4.1
+  // described in section 5.4.1
   object PKs {
     import slick.lifted.MappedTo
     case class MessagePK(value: Long) extends AnyVal with MappedTo[Long]

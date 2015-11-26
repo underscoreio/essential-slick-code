@@ -6,7 +6,7 @@ import slick.driver.H2Driver.api._
 import slick.collection.heterogeneous.{ HList, HCons, HNil, Nat }
 import slick.collection.heterogeneous.syntax._
 
-// Code relating to 4.2.3 "Heterogeneous Lists"
+// Code relating to 5.2.3 "Heterogeneous Lists"
 
 object HListExampleApp extends App {
 

@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
 
-// Code relating to 4.3.4 "Foreign Keys"
+// Code relating to 5.3.5 "Foreign Keys"
 
 object ForeignKeyExample extends App {
 
