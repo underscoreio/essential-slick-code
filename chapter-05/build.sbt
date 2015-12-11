@@ -25,6 +25,7 @@ libraryDependencies ++= Seq(
   "org.joda"            % "joda-convert"    % "1.2")
 
 initialCommands in console := """
+  |import org.joda.time._
   |import scala.concurrent.ExecutionContext.Implicits.global
   |import scala.concurrent.Await
   |import scala.concurrent.duration._
