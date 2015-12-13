@@ -34,12 +34,16 @@ object Example extends App {
     Message("Dave", "Open the pod bay doors, HAL."),
     Message("HAL",  "I'm sorry, Dave. I'm afraid I can't do that."))
 
-  def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  for {
-    //Create the table:
-    _     <- messages.schema.create
+  def populate: DBIOAction[Option[Int], NoStream,Effect.All] =  {
+    for {    
+    //Drop table if it already exists, then create the table:
+    _     <- messages.schema.drop.asTry andThen messages.schema.create
     // Add some data:
     count <- messages ++= testData
   } yield count
+    
+    
+  }
 
   // Utility to print out what is in the database:
   def printCurrentDatabaseState() = {
