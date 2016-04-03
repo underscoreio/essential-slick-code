@@ -4,12 +4,17 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import slick.backend.DatabaseConfig
 import slick.driver.{JdbcProfile, H2Driver}
 
 trait DatabaseProfile {
   val profile: JdbcProfile
+  val db: profile.api.Database
 
   import profile.api._
+
+  def exec[T](action: DBIO[T]): T =
+    Await.result(db.run(action), 2 seconds)
 }
 
 
@@ -29,7 +34,7 @@ trait ArtistDatabaseModule {
     def * = (name, id) <> (Artist.tupled, Artist.unapply)
   }
 
-  lazy val ArtistTable = TableQuery[ArtistTable]
+  val ArtistTable = TableQuery[ArtistTable]
 }
 
 
@@ -51,7 +56,7 @@ trait AlbumDatabaseModule {
     def * = (artistId, title, id) <> (Album.tupled, Album.unapply)
   }
 
-  lazy val AlbumTable = TableQuery[AlbumTable]
+  val AlbumTable = TableQuery[AlbumTable]
 
   val selectAllAction: DBIO[Seq[(Artist, Album)]] =
     ArtistTable.join(AlbumTable)
@@ -94,28 +99,21 @@ trait TestDataModule {
 }
 
 
-
-class DatabaseLayer[A <: JdbcProfile](val profile: JdbcProfile) extends DatabaseProfile
+class DatabaseLayer(
+  val profile: JdbcProfile,
+  val db: JdbcProfile#Backend#Database
+) extends DatabaseProfile
   with ArtistDatabaseModule
   with AlbumDatabaseModule
-  with TestDataModule {
-
-  import profile.api._
-
-  val db = Database.forConfig("musicdb")
-
-  def exec[T](action: DBIO[T]): T =
-    Await.result(db.run(action), 2 seconds)
-}
+  with TestDataModule
 
 
 object Main {
-  val databaselayer = new DatabaseLayer(H2Driver)
+  val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("musicdb")
+  val dbLayer  = new DatabaseLayer(dbConfig.driver, dbConfig.db)
 
-  import databaselayer._
+  import dbLayer._
 
-  def main(args: Array[String]): Unit = {
-
+  def main(args: Array[String]): Unit =
     exec(doEverythingAction).foreach(println)
-  }
 }

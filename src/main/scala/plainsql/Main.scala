@@ -65,7 +65,6 @@ object Main {
 
   // TODO: Write a GetResult for Album
   implicit val albumGetResult: GetResult[Album] = GetResult { r =>
-    ???
     Album(
       artistId = r.nextInt,
       title    = r.nextString,
@@ -146,7 +145,7 @@ object Main {
 
   // Database -----------------------------------
 
-  val db = Database.forConfig("musicdb")
+  val db = Database.forConfig("musicdb.db")
 
 
 

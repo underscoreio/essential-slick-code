@@ -98,7 +98,7 @@ object Main {
 
   // Database -----------------------------------
 
-  val db = Database.forConfig("musicdb")
+  val db = Database.forConfig("musicdb.db")
 
 
 
