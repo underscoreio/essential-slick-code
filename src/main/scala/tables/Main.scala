@@ -10,18 +10,28 @@ object Main {
 
   // Tables -------------------------------------
 
-  case class Album(
-    artist : String,
-    title  : String,
-    id     : Long = 0L)
+  class Album(
+    val artist : String,
+    val title  : String,
+    val year   : Int,
+    val rating : Rating,
+    val id     : Long = 0L)
 
   class AlbumTable(tag: Tag) extends Table[Album](tag, "albums") {
     def artist = column[String]("artist")
     def title  = column[String]("title")
+    def year   = column[Int]("year")
+    def rating = column[Rating]("rating")
     def id     = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def * = (artist, title, id) <> (Album.tupled, Album.unapply)
+    def * = (artist, title, year, rating, id) <> ((createAlbum _).tupled, extractAlbum)
   }
+
+  def createAlbum(artist: String, title: String, year: Int, rating: Rating, id: Long = 0L) =
+    new Album(artist, title, year, rating, id)
+
+  def extractAlbum(album: Album) =
+    Some((album.artist, album.title, album.year, album.rating, album.id))
 
   lazy val AlbumTable = TableQuery[AlbumTable]
 
@@ -34,11 +44,11 @@ object Main {
 
   val insertAlbumsAction =
     AlbumTable ++= Seq(
-      Album( "Keyboard Cat"  , "Keyboard Cat's Greatest Hits"  ), // released in 2009
-      Album( "Spice Girls"   , "Spice"                         ), // released in 1996
-      Album( "Rick Astley"   , "Whenever You Need Somebody"    ), // released in 1987
-      Album( "Manowar"       , "The Triumph of Steel"          ), // released in 1992
-      Album( "Justin Bieber" , "Believe"                       )) // released in 2013
+      createAlbum( "Keyboard Cat"  , "Keyboard Cat's Greatest Hits" , 2009 , Rating.Awesome ),
+      createAlbum( "Spice Girls"   , "Spice"                        , 1996 , Rating.Good    ),
+      createAlbum( "Rick Astley"   , "Whenever You Need Somebody"   , 1987 , Rating.NotBad  ),
+      createAlbum( "Manowar"       , "The Triumph of Steel"         , 1992 , Rating.Meh     ),
+      createAlbum( "Justin Bieber" , "Believe"                      , 2013 , Rating.Aaargh  ))
 
   val selectAlbumsAction =
     AlbumTable.result
