@@ -1,0 +1,16 @@
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-5level %date{ISO8601} %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="slick.compiler.QueryCompilerBenchmark" level="INFO"/>
+  <logger name="slick.jdbc.JdbcBackend.benchmark"      level="INFO"/>
+  <logger name="slick.jdbc.JdbcBackend.statement"      level="INFO"/>
+  <logger name="slick.jdbc.StatementInvoker.result"    level="INFO"/>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
