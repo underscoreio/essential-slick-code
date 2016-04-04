@@ -80,22 +80,27 @@ object Main {
 
   // Aggregates ---------------------------------
 
-  val numberOfAlbumsByArtist =
+  val numberOfAlbumsByArtistQuery: Query[(Rep[Long], Rep[Int]), (Long, Int), Seq] =
     AlbumTable
       .groupBy(_.artistId)
       .map { case (artistId, albums) => artistId -> albums.length }
-      .result
 
-  val highestAlbumRatingByArtist =
+  val numberOfAlbumsByArtist: DBIOAction[Seq[(Long, Int)], NoStream, Effect.Read] =
+      numberOfAlbumsByArtistQuery.result
+
+  val highestAlbumRatingByArtistQuery: Query[(Rep[Long], Rep[Option[Rating]]), (Long, Option[Rating]), Seq] =
     AlbumTable
       .groupBy { album => album.artistId }
       .map { case (artistId, query) => artistId -> query.map(_.rating).max }
-      .result
+
+  val highestAlbumRatingByArtist: DBIOAction[Seq[(Long, Option[Rating])], NoStream, Effect.Read] =
+    highestAlbumRatingByArtistQuery.result
+
 
 
   // Exercises ----------------------------------
 
-  val publishingRangeByArtist =
+  val publishingRangeByArtistQuery: Query[(Rep[String], (Rep[Option[Int]], Rep[Option[Int]])), (String, (Option[Int], Option[Int])), Seq] =
     ArtistTable.join(AlbumTable)
       .on { case (artist, album) => artist.id === album.artistId }
       .groupBy { case (artist, album) => artist.name }
@@ -105,8 +110,19 @@ object Main {
             query.map { case (artist, album) => album.year }.min,
             query.map { case (artist, album) => album.year }.max
           ))
-        }
-      .result
+      }
+
+  val publishingRangeByArtist: DBIOAction[Seq[(String, (Option[Int], Option[Int]))], NoStream, Effect.Read] =
+    publishingRangeByArtistQuery.result
+
+  val highestAlbumRatingByArtistNameQuery: Query[(Rep[String], Rep[Option[Rating]]), (String, Option[Rating]), Seq] =
+    for {
+      artist                <- ArtistTable
+      (artistId, maxRating) <- highestAlbumRatingByArtistQuery if artist.id === artistId
+    } yield (artist.name, maxRating)
+
+  val highestAlbumRatingByArtistName: DBIOAction[Seq[(String, Option[Rating])], NoStream, Effect.Read] =
+    highestAlbumRatingByArtistNameQuery.result
 
 
 
