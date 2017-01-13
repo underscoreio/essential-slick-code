@@ -10,43 +10,18 @@ object TsqlExample extends App {
 
   import slick.driver.H2Driver.api._
 
-  // Simplified Schema...
-
-  final case class Message(content: String, id: Long = 0L)
-
-  val testData = Seq(
-    Message("Hello, HAL. Do you read me, HAL?"),
-    Message("Affirmative, Dave. I read you."),
-    Message("Open the pod bay doors, HAL."),
-    Message("I'm sorry, Dave. I'm afraid I can't do that.")
-  )
-
-  final class MessageTable(tag: Tag) extends Table[Message](tag, "message") {
-    def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def content = column[String]("content")
-    def * = (content, id) <> (Message.tupled, Message.unapply)
-  }
-
-  val messages = TableQuery[MessageTable]
-
-  //
-  // Compile-time type checked query example
-  //
-  // See what happens if you change the `String` to a different type;
-  // or select the `id` column rather than `content`.
   val query: DBIO[Seq[String]] =
     tsql""" select "content" from "message" """
 
-  // Execute the query:
-  val prog = for {
-    _   <- messages.schema.create
-    _   <- messages ++= testData
-    msg <- query
-  } yield msg
+  val insert: DBIO[Seq[Int]] =
+    tsql"""insert into "message" ("content") values ('Hello') """
 
-  val db = Database.forConfig("chapter07")
+  // Using the TSQL configuration directly:
+  import slick.backend.DatabaseConfig
+  val conf: DatabaseConfig[slick.driver.H2Driver] = DatabaseConfig.forConfig("tsql")
+  val db = conf.db
   println("Content is:")
-  val future = db.run(prog).map { _ foreach println }
+  val future = db.run(insert andThen query).map { _ foreach println }
   Await.result(future, 2 seconds)
 
   db.close
