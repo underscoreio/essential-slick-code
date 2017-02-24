@@ -6,7 +6,7 @@ import slick.lifted.MappedTo
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone._
@@ -16,7 +16,7 @@ object ChatSchema {
   case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
-    val profile: slick.driver.JdbcProfile
+    val profile: slick.jdbc.JdbcProfile
   }
 
   trait Tables {
@@ -31,7 +31,7 @@ object ChatSchema {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (name, email, id) <> (User.tupled, User.unapply)
+      def * = (name, email, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -42,7 +42,7 @@ object ChatSchema {
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
       def id    = column[PK[RoomTable]]("id", O.PrimaryKey, O.AutoInc)
       def title = column[String]("title")
-      def * = (title, id) <> (Room.tupled, Room.unapply)
+      def * = (title, id).mapTo[Room]
     }
 
     lazy val rooms = TableQuery[RoomTable]
@@ -56,7 +56,7 @@ object ChatSchema {
       def pk   = primaryKey("occ_room_user_pk", (roomId, userId))
       def user = foreignKey("occ_user_fk", userId, users)(_.id)
       def room = foreignKey("occ_room_fk", roomId, rooms)(_.id)
-      def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
+      def * = (roomId, userId).mapTo[Occupant]
     }
 
     lazy val occupants = TableQuery[OccupantTable]
@@ -80,7 +80,7 @@ object ChatSchema {
       def ts       = column[DateTime]("ts")
       def roomId   = column[Option[PK[RoomTable]]]("room") // in a particular room? or broadcast?
       def toId     = column[Option[PK[UserTable]]]("to")   // direct message?
-      def * = (senderId, content, ts, roomId, toId, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, roomId, toId, id).mapTo[Message]
 
       def sender = foreignKey("msg_sender_fk", senderId, users)(_.id)
       def to     = foreignKey("msg_to_fk", toId, users)(_.id.?)

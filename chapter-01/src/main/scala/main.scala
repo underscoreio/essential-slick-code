@@ -1,5 +1,5 @@
 // Import the Slick interface for H2:
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -29,7 +29,7 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
 
-    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
+    def * = (sender, content, id).mapTo[Message]
   }
 
   // Base query for querying the messages table:

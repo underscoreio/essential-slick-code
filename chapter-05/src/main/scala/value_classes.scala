@@ -5,7 +5,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.dbio._
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 import slick.lifted.MappedTo
 
 // Code relating to 5.4.1 "Value Classes"
@@ -48,7 +48,7 @@ object ChatSchema {
       def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
-      def * = (name, id) <> (User.tupled, User.unapply)
+      def * = (name, id).mapTo[User]
     }
 
     lazy val users      = TableQuery[UserTable]
@@ -70,7 +70,7 @@ object ChatSchema {
       def content  = column[String]("content")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, id).mapTo[Message]
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete = ForeignKeyAction.Cascade)
     }
@@ -97,14 +97,14 @@ object ChatSchema {
     }
   }
 
-  class Schema(val profile: slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: slick.jdbc.JdbcProfile) extends Tables with Profile
 
 }
 
 object ValueClassesExample extends App {
   import ChatSchema._
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   def exec[T](action: DBIO[T]): T =
     Await.result(db.run(action), 2 seconds)

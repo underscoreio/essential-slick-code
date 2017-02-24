@@ -8,7 +8,7 @@ import slick.backend.StaticDatabaseConfig
 @StaticDatabaseConfig("file:src/main/resources/application.conf#tsql")
 object TsqlExample extends App {
 
-  import slick.driver.H2Driver.api._
+  import slick.jdbc.H2Profile.api._
 
   val query: DBIO[Seq[String]] =
     tsql""" select "content" from "message" """
@@ -17,8 +17,8 @@ object TsqlExample extends App {
     tsql"""insert into "message" ("content") values ('Hello') """
 
   // Using the TSQL configuration directly:
-  import slick.backend.DatabaseConfig
-  val conf: DatabaseConfig[slick.driver.H2Driver] = DatabaseConfig.forConfig("tsql")
+  import slick.basic.DatabaseConfig
+  val conf: DatabaseConfig[slick.jdbc.H2Profile] = DatabaseConfig.forConfig("tsql")
   val db = conf.db
   println("Content is:")
   val future = db.run(insert andThen query).map { _ foreach println }

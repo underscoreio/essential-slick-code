@@ -1,7 +1,7 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 import scala.util.Try
 
 object Example extends App {
@@ -14,7 +14,7 @@ object Example extends App {
     def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def sender  = column[String]("sender")
     def content = column[String]("content")
-    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
+    def * = (sender, content, id).mapTo[Message]
   }
 
   // Table:

@@ -1,3 +1,0 @@
-GET   /                     controllers.ApplicationController.index
-GET   /data/messages        controllers.ApplicationController.messages
- 

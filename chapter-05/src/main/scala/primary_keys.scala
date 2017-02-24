@@ -2,7 +2,7 @@ import org.joda.time.DateTime
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 // Code relating to 5.3.2 "Primary Keys".
 
@@ -27,7 +27,7 @@ object PKExample extends App {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (id.?, name, email) <> (User.tupled, User.unapply)
+      def * = (id.?, name, email).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -41,7 +41,7 @@ object PKExample extends App {
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
      def id    = column[Long]("id", O.PrimaryKey, O.AutoInc)
      def title = column[String]("title")
-     def * = (title, id) <> (Room.tupled, Room.unapply)
+     def * = (title, id).mapTo[Room]
     }
 
     lazy val rooms = TableQuery[RoomTable]
@@ -58,7 +58,7 @@ object PKExample extends App {
 
       def pk = primaryKey("room_user_pk", (roomId, userId))
 
-      def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
+      def * = (roomId, userId).mapTo[Occupant]
     }
 
     lazy val occupants = TableQuery[OccupantTable]
@@ -71,7 +71,7 @@ object PKExample extends App {
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 

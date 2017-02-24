@@ -1,4 +1,4 @@
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -32,7 +32,7 @@ object SumTypesExample extends App {
       def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
-      def * = (name, id) <> (User.tupled, User.unapply)
+      def * = (name, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -74,7 +74,7 @@ object SumTypesExample extends App {
       def content  = column[String]("content")
       def flag     = column[Option[Flag]]("flag")
 
-      def * = (senderId, content, flag, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, flag, id).mapTo[Message]
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
     }
@@ -87,7 +87,7 @@ object SumTypesExample extends App {
 
   class Schema(val profile:JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
   import PKs._

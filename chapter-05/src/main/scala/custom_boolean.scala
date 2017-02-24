@@ -6,7 +6,7 @@ import org.joda.time.DateTimeZone.UTC
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 import slick.lifted.MappedTo
 
 //
@@ -42,7 +42,7 @@ object CustomBooleanExample extends App {
       def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
-      def * = (name, id) <> (User.tupled, User.unapply)
+      def * = (name, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -77,7 +77,7 @@ object CustomBooleanExample extends App {
       def priority = column[Option[Priority]]("priority")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, priority, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, priority, id).mapTo[Message]
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
     }
@@ -88,9 +88,9 @@ object CustomBooleanExample extends App {
   }
 
 
-  class Schema(val profile: slick.driver.JdbcProfile) extends Tables with Profile
+  class Schema(val profile: slick.jdbc.JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
   import PKs._

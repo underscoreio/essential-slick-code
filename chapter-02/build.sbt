@@ -1,17 +1,17 @@
 name := "essential-slick-chapter-02"
 
-version := "3.1"
+version := "3.2"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.1"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"           % "3.1.0",
+  "com.typesafe.slick" %% "slick"           % "3.2.0",
   "com.h2database"      % "h2"              % "1.4.185",
   "ch.qos.logback"      % "logback-classic" % "1.1.2"
 )
 
 initialCommands in console := """
-  |import slick.driver.H2Driver.api._
+  |import slick.jdbc.H2Profile.api._
   |import Example._
   |import scala.concurrent.Await
   |import scala.concurrent.duration._

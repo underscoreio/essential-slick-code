@@ -1,7 +1,7 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 // Code relating to 5.3.1 "Nullable Columns"
 
@@ -23,7 +23,7 @@ object NullExample extends App {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (name, email, id) <> (User.tupled, User.unapply)
+      def * = (name, email, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -32,7 +32,7 @@ object NullExample extends App {
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 

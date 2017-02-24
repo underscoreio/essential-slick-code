@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object JoinsExample extends App {
 
-  val schema = Schema(slick.driver.H2Driver)
+  val schema = Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 
