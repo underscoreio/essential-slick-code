@@ -10,7 +10,7 @@ import java.sql.Timestamp
 
 object UpdateExample extends App {
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
   import schema._, profile.api._
 
   val db = Database.forConfig("chapter07")

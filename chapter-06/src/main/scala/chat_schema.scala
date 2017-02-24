@@ -6,7 +6,7 @@ import slick.lifted.MappedTo
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone._
@@ -16,7 +16,7 @@ object ChatSchema {
   case class PK[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
-    val profile: slick.driver.JdbcProfile
+    val profile: slick.jdbc.JdbcProfile
   }
 
   trait Tables {

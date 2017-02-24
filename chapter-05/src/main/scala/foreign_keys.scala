@@ -6,7 +6,7 @@ import org.joda.time.DateTimeZone.UTC
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 // Code relating to 5.3.5 "Foreign Keys"
 
@@ -69,7 +69,7 @@ object ForeignKeyExample extends App {
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 

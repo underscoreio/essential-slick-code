@@ -1,8 +1,8 @@
 name := "essential-slick-chapter-05"
 
-version := "3.1"
+version := "3.2"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.1"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -18,7 +18,7 @@ scalacOptions ++= Seq(
 
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"           % "3.1.0",
+  "com.typesafe.slick" %% "slick"           % "3.2.0",
   "com.h2database"      % "h2"              % "1.4.185",
   "ch.qos.logback"      % "logback-classic" % "1.1.2",
   "joda-time"           % "joda-time"       % "2.6",
@@ -30,7 +30,7 @@ initialCommands in console := """
   |import scala.concurrent.Await
   |import scala.concurrent.duration._
   |import ChatSchema._
-  |val schema = new Schema(slick.driver.H2Driver)
+  |val schema = new Schema(slick.jdbc.H2Profile)
   |import schema._
   |import profile.api._
   |import PKs._
