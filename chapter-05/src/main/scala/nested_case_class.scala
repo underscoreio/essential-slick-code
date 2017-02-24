@@ -1,9 +1,9 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
-// Solution to exercise 5.2.4.1
+// Template for you to complete for exercise 5.6.1
 
 object NestedCaseClassExampleApp extends App {
 
@@ -57,7 +57,7 @@ object NestedCaseClassExampleApp extends App {
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 

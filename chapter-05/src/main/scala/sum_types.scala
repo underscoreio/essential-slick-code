@@ -1,4 +1,4 @@
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -87,7 +87,7 @@ object SumTypesExample extends App {
 
   class Schema(val profile:JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
   import PKs._

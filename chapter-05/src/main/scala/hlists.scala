@@ -1,8 +1,8 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
-import slick.driver.H2Driver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.H2Profile.api._
 import slick.collection.heterogeneous.{ HList, HCons, HNil, Nat }
 import slick.collection.heterogeneous.syntax._
 
@@ -65,7 +65,7 @@ object HListExampleApp extends App {
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
 

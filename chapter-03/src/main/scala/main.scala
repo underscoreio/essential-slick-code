@@ -1,7 +1,7 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 import scala.util.Try
 
 object Example extends App {

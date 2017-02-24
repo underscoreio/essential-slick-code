@@ -1,4 +1,4 @@
-import slick.driver.{JdbcProfile, JdbcDriver}
+import slick.jdbc.JdbcProfile
 import slick.lifted.MappedTo
 
 import java.sql.Timestamp
@@ -12,7 +12,7 @@ object ChatSchema {
   case class Id[A](value: Long) extends AnyVal with MappedTo[Long]
 
   trait Profile {
-    val profile: slick.driver.JdbcProfile
+    val profile: slick.jdbc.JdbcProfile
   }
 
   trait Tables {
@@ -140,5 +140,5 @@ object ChatSchema {
   }
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
-  case class DB(driver: JdbcDriver, url: String, clazz: String)
+  case class DB(profile: JdbcProfile, url: String, clazz: String)
 }

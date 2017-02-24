@@ -5,11 +5,11 @@ import scala.language.higherKinds
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 object AggregatesExample extends App {
 
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
   import schema._, profile.api._
   val db = Database.forConfig("chapter06")
   def exec[T](action: DBIO[T]): T = Await.result(db.run(action), 2 seconds)
@@ -21,7 +21,7 @@ object AggregatesExample extends App {
   println(s"Total messages: ${numRows}")
 
   // Number of message senders:
-  val senders:Int = exec(messages.map(_.senderId).countDistinct.result)
+  val senders:Int = exec(messages.map(_.senderId).distinct.length.result)
   println(s"Unique message senders: ${senders}")
 
   // First message date:

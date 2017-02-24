@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 trait Profile {
   val profile : JdbcProfile
@@ -30,7 +30,7 @@ trait Tables {
 
   object messages extends TableQuery( new MessageTable(_)) {
     def messagesFrom(name: String) = this.filter(_.sender === name)
-    val numSenders = this.map(_.sender).countDistinct
+    val numSenders = this.map(_.sender).distinct.length
   }
 
 }
@@ -42,7 +42,7 @@ object StructureExample extends App {
   class Schema(val profile: JdbcProfile) extends Tables with Profile
 
   // A specific schema with a particular driver:
-  val schema = new Schema(slick.driver.H2Driver)
+  val schema = new Schema(slick.jdbc.H2Profile)
 
   // Use the schema:
   import schema._, profile.api._
