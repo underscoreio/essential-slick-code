@@ -29,7 +29,7 @@ object Example extends App {
     def sender  = column[String]("sender")
     def content = column[String]("content")
 
-    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
+    def * = (sender, content, id).mapTo[Message]
   }
 
   // Base query for querying the messages table:

@@ -48,7 +48,7 @@ object ChatSchema {
       def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
-      def * = (name, id) <> (User.tupled, User.unapply)
+      def * = (name, id).mapTo[User]
     }
 
     lazy val users      = TableQuery[UserTable]
@@ -70,7 +70,7 @@ object ChatSchema {
       def content  = column[String]("content")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, id).mapTo[Message]
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete = ForeignKeyAction.Cascade)
     }

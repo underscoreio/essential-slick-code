@@ -27,7 +27,7 @@ object PKExample extends App {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (id.?, name, email) <> (User.tupled, User.unapply)
+      def * = (id.?, name, email).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -41,7 +41,7 @@ object PKExample extends App {
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
      def id    = column[Long]("id", O.PrimaryKey, O.AutoInc)
      def title = column[String]("title")
-     def * = (title, id) <> (Room.tupled, Room.unapply)
+     def * = (title, id).mapTo[Room]
     }
 
     lazy val rooms = TableQuery[RoomTable]
@@ -58,7 +58,7 @@ object PKExample extends App {
 
       def pk = primaryKey("room_user_pk", (roomId, userId))
 
-      def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
+      def * = (roomId, userId).mapTo[Occupant]
     }
 
     lazy val occupants = TableQuery[OccupantTable]

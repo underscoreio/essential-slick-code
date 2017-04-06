@@ -25,7 +25,7 @@ trait Tables {
     def id      = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def sender  = column[String]("sender")
     def content = column[String]("content")
-    def * = (sender, content, id) <> (Message.tupled, Message.unapply)
+    def * = (sender, content, id).mapTo[Message]
   }
 
   object messages extends TableQuery( new MessageTable(_)) {

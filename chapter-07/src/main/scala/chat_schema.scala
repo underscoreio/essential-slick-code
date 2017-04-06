@@ -27,7 +27,7 @@ object ChatSchema {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (id,name, email) <> (User.tupled, User.unapply)
+      def * = (id,name, email).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -38,7 +38,7 @@ object ChatSchema {
     class RoomTable(tag: Tag) extends Table[Room](tag, "room") {
       def id    = column[Id[RoomTable]]("id", O.PrimaryKey, O.AutoInc)
       def title = column[String]("title")
-      def * = (title, id) <> (Room.tupled, Room.unapply)
+      def * = (title, id).mapTo[Room]
     }
 
     lazy val rooms = TableQuery[RoomTable]
@@ -52,7 +52,7 @@ object ChatSchema {
       def pk   = primaryKey("occ_room_user_pk", (roomId, userId))
       def user = foreignKey("occ_user_fk", userId, users)(_.id)
       def room = foreignKey("occ_room_fk", roomId, rooms)(_.id)
-      def * = (roomId, userId) <> (Occupant.tupled, Occupant.unapply)
+      def * = (roomId, userId).mapTo[Occupant]
     }
 
     lazy val occupants = TableQuery[OccupantTable]
@@ -76,7 +76,7 @@ object ChatSchema {
       def ts       = column[DateTime]("ts")
       def roomId   = column[Option[Id[RoomTable]]]("room") // in a particular room? or broadcast?
       def toId     = column[Option[Id[UserTable]]]("to")   // direct message?
-      def * = (senderId, content, ts, roomId, toId, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, roomId, toId, id).mapTo[Message]
 
       def sender = foreignKey("msg_sender_fk", senderId, users)(_.id)
       def to     = foreignKey("msg_to_fk", toId, users)(_.id.?)

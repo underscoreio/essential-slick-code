@@ -23,7 +23,7 @@ object NullExample extends App {
       def name  = column[String]("name")
       def email = column[Option[String]]("email")
 
-      def * = (name, email, id) <> (User.tupled, User.unapply)
+      def * = (name, email, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]

@@ -11,7 +11,7 @@ import slick.collection.heterogeneous.syntax._
 object HListExampleApp extends App {
 
   trait Profile {
-    val profile:JdbcProfile
+    val profile: JdbcProfile
   }
 
   trait Tables {
@@ -19,12 +19,35 @@ object HListExampleApp extends App {
 
     import profile.api._
 
-    type User = String :: Int :: Char :: Float :: Float :: Int :: String :: String :: Boolean :: Boolean :: String ::
-      String :: String :: String :: String :: String :: String :: String :: String :: String :: Int :: Boolean ::
-      String :: String  :: Long ::
-      HNil
+    case class UserClass(
+       name         : String,
+       age          : Int,
+       gender       : Char,
+       height       : Float,
+       weight       : Float,
+       shoeSize     : Int,
+       email        : String,
+       phone        : String,
+       accepted     : Boolean,
+       sendNews     : Boolean,
+       street       : String,
+       city         : String,
+       country      : String,
+       faveColor    : String,
+       faveFood     : String,
+       faveDrink    : String,
+       faveTvShow   : String,
+       faveMovie    : String,
+       faveSong     : String,
+       lastPurchase : String,
+       lastRating   : Int,
+       tellFriends  : Boolean,
+       petName      : String,
+       partnerName  : String,
+       id           : Long
+     )
 
-    final class UserTable(tag: Tag) extends Table[User](tag, "user") {
+    final class UserTable(tag: Tag) extends Table[UserClass](tag, "user") {
       def id           = column[Long]("id", O.PrimaryKey, O.AutoInc)
       def name         = column[String]("name")
       def age          = column[Int]("age")
@@ -51,16 +74,15 @@ object HListExampleApp extends App {
       def petName      = column[String]("pet")
       def partnerName  = column[String]("partner")
 
-    def * = name :: age :: gender :: height :: weight :: shoeSize ::
-          email :: phone :: accepted :: sendNews ::
-          street :: city :: country ::
-          faveColor :: faveFood :: faveDrink :: faveTvShow :: faveMovie :: faveSong ::
-          lastPurchase :: lastRating :: tellFriends ::
-          petName :: partnerName :: id ::
-          HNil
-  }
+      def * = (name :: age :: gender :: height :: weight :: shoeSize ::
+            email :: phone :: accepted :: sendNews ::
+            street :: city :: country ::
+            faveColor :: faveFood :: faveDrink :: faveTvShow :: faveMovie :: faveSong ::
+            lastPurchase :: lastRating :: tellFriends ::
+            petName :: partnerName :: id :: HNil).mapTo[UserClass]
+    }
 
-  lazy val users = TableQuery[UserTable]
+    lazy val users = TableQuery[UserTable]
   }
 
   class Schema(val profile: JdbcProfile) extends Tables with Profile
@@ -74,14 +96,16 @@ object HListExampleApp extends App {
 
   val db = Database.forConfig("chapter05")
 
+  val caseClassDave = UserClass(
+      "Dr. Dave Bowman", 43, 'M', 1.7f, 74.2f, 11, "dave@example.org", "+1555740122", true, true,
+      "123 Some Street", "Any Town", "USA",
+      "Black", "Ice Cream", "Coffee", "Sky at Night", "Silent Running", "Bicycle made for Two",
+      "Acme Space Helmet", 10, true,
+      "HAL", "Betty", 0L)
+
   val program = for {
     _ <- users.schema.create
-    _ <- users +=
-          "Dr. Dave Bowman" :: 43 :: 'M' :: 1.7f :: 74.2f :: 11 :: "dave@example.org" :: "+1555740122" :: true :: true ::
-            "123 Some Street" :: "Any Town" :: "USA" ::
-            "Black" :: "Ice Cream" :: "Coffee" :: "Sky at Night" :: "Silent Running" :: "Bicycle made for Two" ::
-            "Acme Space Helmet" :: 10 :: true ::
-            "HAL" :: "Betty" :: 0L :: HNil
+    _ <- users += caseClassDave
     folks  <- users.result
   } yield folks
 

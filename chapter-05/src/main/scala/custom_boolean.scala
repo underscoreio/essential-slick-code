@@ -42,7 +42,7 @@ object CustomBooleanExample extends App {
       def id   = column[UserPK]("id", O.PrimaryKey, O.AutoInc)
       def name = column[String]("name")
 
-      def * = (name, id) <> (User.tupled, User.unapply)
+      def * = (name, id).mapTo[User]
     }
 
     lazy val users = TableQuery[UserTable]
@@ -77,7 +77,7 @@ object CustomBooleanExample extends App {
       def priority = column[Option[Priority]]("priority")
       def ts       = column[DateTime]("ts")
 
-      def * = (senderId, content, ts, priority, id) <> (Message.tupled, Message.unapply)
+      def * = (senderId, content, ts, priority, id).mapTo[Message]
 
       def sender = foreignKey("sender_fk", senderId, users)(_.id, onDelete=ForeignKeyAction.Cascade)
     }
