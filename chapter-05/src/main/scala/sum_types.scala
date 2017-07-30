@@ -2,7 +2,6 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import slick.lifted.MappedTo
 
 // Code relating to 5.4.2 "Sum Types"
 
@@ -90,7 +89,6 @@ object SumTypesExample extends App {
   val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
-  import PKs._
 
   val db = Database.forConfig("chapter05")
 

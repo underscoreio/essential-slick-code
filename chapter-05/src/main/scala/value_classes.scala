@@ -6,7 +6,6 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.dbio._
 import slick.jdbc.JdbcProfile
-import slick.lifted.MappedTo
 
 // Code relating to 5.4.1 "Value Classes"
 
@@ -110,7 +109,6 @@ object ValueClassesExample extends App {
     Await.result(db.run(action), 2 seconds)
 
   import schema._, profile.api._
-  import PKs._
 
   val db = Database.forConfig("chapter05")
 

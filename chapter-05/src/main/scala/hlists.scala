@@ -2,9 +2,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.jdbc.JdbcProfile
-import slick.jdbc.H2Profile.api._
-import slick.collection.heterogeneous.{ HList, HCons, HNil, Nat }
-import slick.collection.heterogeneous.syntax._
+import slick.collection.heterogeneous.HNil
 
 // Code relating to 5.2.3 "Heterogeneous Lists"
 

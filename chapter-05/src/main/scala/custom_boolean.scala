@@ -7,7 +7,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.jdbc.JdbcProfile
-import slick.lifted.MappedTo
 
 //
 // Solution to "Custom Boolean" exercise
@@ -29,7 +28,7 @@ object CustomBooleanExample extends App {
     this: Profile =>
 
     import profile.api._
-    import PKs._
+    import PKs.{UserPK, MessagePK}
 
     implicit val jodaDateTimeType =
       MappedColumnType.base[DateTime, Timestamp](
@@ -93,7 +92,6 @@ object CustomBooleanExample extends App {
   val schema = new Schema(slick.jdbc.H2Profile)
 
   import schema._, profile.api._
-  import PKs._
 
   def exec[T](action: DBIO[T]): T =
     Await.result(db.run(action), 2 seconds)
