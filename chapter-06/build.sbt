@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   "com.h2database"      % "h2"                    % "1.4.185",
   "org.postgresql"      % "postgresql"            % "9.3-1100-jdbc41",
   "mysql"               % "mysql-connector-java"  % "5.1.35",
-  "ch.qos.logback"      % "logback-classic"       % "1.1.2",
+  "ch.qos.logback"      % "logback-classic"       % "1.2.3",
   "joda-time"           % "joda-time"             % "2.6",
   "org.joda"            % "joda-convert"          % "1.2")
 
