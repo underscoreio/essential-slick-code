@@ -2,7 +2,7 @@ name := "essential-slick-chapter-07"
 
 version := "3.2"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.3"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -12,17 +12,16 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:postfixOps",
   "-Ywarn-dead-code",
-  "-Xlint",
   "-Xfatal-warnings"
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"                 % "3.2.0",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
+  "com.typesafe.slick" %% "slick"                 % "3.2.1",
+  "com.typesafe.slick" %% "slick-hikaricp"        % "3.2.0",
   "com.h2database"      % "h2"                    % "1.4.185",
   "org.postgresql"      % "postgresql"            % "9.3-1100-jdbc41",
   "mysql"               % "mysql-connector-java"  % "5.1.35",
-  "ch.qos.logback"      % "logback-classic"       % "1.1.2",
+  "ch.qos.logback"      % "logback-classic"       % "1.2.3",
   "joda-time"           % "joda-time"             % "2.6",
   "org.joda"            % "joda-convert"          % "1.2")
 

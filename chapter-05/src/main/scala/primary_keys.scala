@@ -1,4 +1,3 @@
-import org.joda.time.DateTime
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

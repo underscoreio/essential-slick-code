@@ -1,8 +1,3 @@
-import java.sql.Timestamp
-import org.joda.time.DateTime
-import org.joda.time.DateTimeZone.UTC
-import org.joda.time.DateTime
-import org.joda.time.DateTimeZone.UTC
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

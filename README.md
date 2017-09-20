@@ -12,7 +12,7 @@ _Essential Slick_ provides a compact, no-nonsense guide to everything you need t
 *    Chapter 6 explores advanced select queries, including joins and aggregates.
 *    Chapter 7 provides a brief overview of Plain SQL queries. This is a useful tool when you need fine control over the SQL sent to your database.
 
-To find out more about the book and download the preview chapters, see [Underscore.io](http://underscore.io/books/essential-slick/).
+To find out more about the book and download the preview chapters, see [Underscore.io](https://underscore.io/books/essential-slick/).
 
   _If you're looking for the example code for Slick 2.1, use the [2.1 branch](https://github.com/underscoreio/essential-slick-code/tree/2.1)_.
 
