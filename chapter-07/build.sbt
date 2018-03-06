@@ -16,7 +16,7 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"                 % "3.2.1",
+  "com.typesafe.slick" %% "slick"                 % "3.2.2",
   "com.typesafe.slick" %% "slick-hikaricp"        % "3.2.0",
   "com.h2database"      % "h2"                    % "1.4.185",
   "org.postgresql"      % "postgresql"            % "9.3-1100-jdbc41",
@@ -37,4 +37,3 @@ initialCommands in console := """
   |val db = Database.forConfig("chapter07")
   |exec(populate)
 """.trim.stripMargin
-
