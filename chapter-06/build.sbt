@@ -16,7 +16,7 @@ scalacOptions ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang"      % "scala-reflect"         % scalaVersion.value,
-  "com.typesafe.slick" %% "slick"                 % "3.2.1",
+  "com.typesafe.slick" %% "slick"                 % "3.2.2",
   "com.h2database"      % "h2"                    % "1.4.185",
   "org.postgresql"      % "postgresql"            % "9.3-1100-jdbc41",
   "mysql"               % "mysql-connector-java"  % "5.1.35",

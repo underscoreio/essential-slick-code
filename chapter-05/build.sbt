@@ -18,7 +18,7 @@ scalacOptions ++= Seq(
 
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"           % "3.2.1",
+  "com.typesafe.slick" %% "slick"           % "3.2.2",
   "com.h2database"      % "h2"              % "1.4.185",
   "ch.qos.logback"      % "logback-classic" % "1.2.3",
   "joda-time"           % "joda-time"       % "2.6",
@@ -38,5 +38,3 @@ initialCommands in console := """
   |val db = Database.forConfig("chapter05")
   |exec(populate)
 """.trim.stripMargin
-
-
