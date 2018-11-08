@@ -93,6 +93,15 @@ object Example extends App {
         update(("HAL 9000", "Sure, Dave. Come right in."))
       }
 
+    // Using a clase class to update:
+    case class NameText(name: String, text: String)
+    val newValue = NameText("Dave", "Now I totally don't trust you.")
+
+    exec {
+      messages.filter(_.id === 7L).map( m => (m.sender, m.content).mapTo[NameText]).update(newValue)
+    }
+    // printCurrentDatabaseState()
+
     // Client-side update:
     def exclaim(msg: Message): Message = msg.copy(content = msg.content + "!")
 
