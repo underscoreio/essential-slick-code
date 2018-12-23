@@ -70,6 +70,16 @@ object Example extends App {
         case n     => insert(n)
       }
 
+    //The myFilter example:
+    def myFilter[T](action: DBIO[T])(p: T => Boolean)(alternative: => T) =
+      action.map {
+        case t if p(t) => t
+        case _         => alternative
+      }
+
+    val marketingCount = myFilter(messages.size.result)( _ > 100)(100)
+    println("\nMarketing say the number of messages is 'roughly':")
+    println(exec(marketingCount))
 
     // Fold:
     val report1: DBIO[Int] = DBIO.successful(41)
