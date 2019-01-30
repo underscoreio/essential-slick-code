@@ -31,7 +31,7 @@ For example:
 
 ```
 $ cd chapter-01
-$ ./sbt.sh
+$ sbt
 ...
 > run
 ...
@@ -60,7 +60,7 @@ Alternatively, use `runMain` or `~runMail` and supply the name of the class to r
 
 ```
 $ cd chapter-05
-$ ./sbt.sh
+$ sbt
 > ~runMain StructureExample
 ```
 
