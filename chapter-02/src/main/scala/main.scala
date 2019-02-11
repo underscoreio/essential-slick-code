@@ -70,5 +70,13 @@ object Example extends App {
       }
     )
 
+    // filterOpt
+    def query(name: Option[String]) =
+      messages.filterOpt(name)( (row, value) => row.sender === value )
+
+    println("\nfilterOpt, example SQL:")
+    println(" With a value: "+query(Some("Dave")).result.statements.mkString)
+    println(" Without a value: "+query(None).result.statements.mkString)
+
   } finally db.close
 }
