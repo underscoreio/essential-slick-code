@@ -5,3 +5,4 @@ target
 .settings
 .cache-main
 play-slick-example/logs/application.log
+chapter-01/.bsp/sbt.json

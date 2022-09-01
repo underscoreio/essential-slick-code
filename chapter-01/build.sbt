@@ -1,8 +1,8 @@
 name := "essential-slick-chapter-01"
 
-version := "3.3"
+version := "3.4"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.8"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -16,12 +16,12 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick"           % "3.3.0",
-  "com.h2database"      % "h2"              % "1.4.197",
-  "ch.qos.logback"      % "logback-classic" % "1.2.3"
+  "com.typesafe.slick" %% "slick"           % "3.4.0",
+  "com.h2database"      % "h2"              % "2.1.214",
+  "ch.qos.logback"      % "logback-classic" % "1.3.0"
 )
 
-initialCommands in console := """
+ console / initialCommands := """
   |import slick.jdbc.H2Profile.api._
   |import Example._
   |import scala.concurrent.duration._
